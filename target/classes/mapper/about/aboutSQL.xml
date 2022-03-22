@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="about">
+	<select id="foodTotalCount" resultType="_int">
+		SELECT COUNT(*) FROM FOOD_LIST
+	</select>
+	<select id="foodCount" parameterType="food" resultType="_int">
+		SELECT COUNT(*) FROM FOOD_LIST WHERE FOOD_CATEGORY=#{foodCategory}
+	</select>
+	
+	<select id="foodList" parameterType="food" resultType="food">
+		SELECT F2.FOOD_NO AS foodNo, F2.FOOD_NAME AS foodName, F2.FOOD_CATEGORY AS foodCategory  FROM (SELECT ROWNUM AS rNum, F.* FROM (SELECT * FROM FOOD_LIST 
+		<if test="foodCategory != '전체'">
+			WHERE FOOD_CATEGORY=#{foodCategory}
+		</if>
+		) F) F2 WHERE rNum=#{rNum}
+	</select>
+	
+</mapper>

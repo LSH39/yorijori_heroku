@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="recipe">
+ 	<select id="selectRecipeList" parameterType="rb" resultType="rb">
+ 		select 
+ 		rownum,
+        r. * from
+        (select 
+ 			recipe_no as recipeNo, 
+ 			recipe_title as recipeTitle, 
+ 			filepath,
+ 			read_count as readCount,
+ 			recipe_time as recipeTime, 
+ 			recipe_level as recipeLevel,
+ 			situation,
+ 			material,
+		(select member_nickname from Member m  where m.member_no = r.recipe_writer) as nickname,
+		 (select member_black from member m where m.member_no=r.recipe_writer )as black
+		from recipe_board r 	
+		<if test="situation == 0 and material == 0  and recipeLevel == 0">
+		where recipe_delete=1 order by 1 desc)r where black=0 and rownum between 1 and 6	
+		</if>
+	<trim suffix="and recipe_delete=1 order by 1 desc )r where black=0 and rownum between 1 and 6 " >
+	<choose>
+		<when test="situation gt 0 and material gt 0 and recipeLevel gt 0 ">
+		 where situation=#{situation} and  material=#{material} and recipe_level=#{recipeLevel}
+		</when>
+		<when test="situation gt 0">
+			where situation=#{situation}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="material gt 0">
+			where material=#{material}
+			<if test="situation gt 0">
+			and situation=#{situation}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="recipeLevel gt 0">
+			where recipe_level=#{recipeLevel}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>		
+	</choose>
+</trim>
+ 	</select>
+ 	<insert id="insertRecipeBoard" parameterType="rb" >
+ 		insert into recipe_board values(recipe_seq.nextval,#{recipeWriter},#{recipeTitle},#{filepath},0,to_char(sysdate,'yyyy-mm-dd'),#{subhead},#{recipeVideo},#{recipeTime},#{foodName},#{recipeLevel},#{situation},#{material},1)
+ 	</insert>
+ 	<select id="selectRecipeNo" resultType="_int">
+ 		select max(recipe_no) from recipe_board 
+ 	</select>
+ 	<insert id="insertMaterial" parameterType="material">
+ 		insert into material values(material_seq.nextval,#{recipeNo},#{materialName},#{mAmount})
+ 	</insert>
+ 	<insert id="insertContent" parameterType="rcontent">
+ 		insert into recipe_content values(r_file_seq.nextval,#{recipeNo},#{filename},#{filepath},#{recipeContent})
+ 	</insert>
+ 	
+ 	<select id="selectOneRecipe" parameterType="hashmap" resultType="rb">
+ 		    select
+ 			recipe_no as recipeNo,
+ 			recipe_title as recipeTitle, 
+ 			recipe_writer as recipeWriter,
+ 			filepath,
+ 			read_count as readCount,
+ 			recipe_date recipeDate,
+ 			subhead,
+ 			recipe_video as recipeVideo,
+ 			recipe_time as recipeTime,
+ 			food_name as foodName,
+ 			recipe_time as recipeTime, 
+ 			recipe_level as recipeLevel,
+ 			(select member_nickname from member m where m.member_no=r.recipe_writer)as nickname,
+ 			(select profile_path from member m where m.member_no=r.recipe_writer)as profile,
+ 			(select member_id from member m where m.member_no=r.recipe_writer)as memberId,
+            (select count(*) from recipe_like rr where rr.recipe_no = r.recipe_no and rr.member_no=#{memberNo}) as likeCheck,
+            (select count(*) from recipe_report rp where rp.recipe_no = r.recipe_no and rp.member_no=#{memberNo}) as reportCheck
+ 		from recipe_board r where recipe_no=#{recipeNo}
+ 			
+ 	</select>
+ 	<select id="selectMaterial"  parameterType="_int" resultType="material">
+ 		select 
+ 			material_no as materialNo,
+ 			recipe_no as recipeNo,
+ 			material_name as materialName,
+ 			m_amount as mAmount
+ 		from material where recipe_no=#{recipeNo}
+ 	</select>
+ 	<select id="selectContent" parameterType="_int" resultType="rcontent">
+ 		select 
+ 			r_file_no as rFileNo,
+ 			recipe_no as recipeNo,
+ 			filename, filepath,
+ 			recipe_content as recipeContent
+ 		from recipe_content where recipe_no=#{recipeNo}
+ 	</select>
+ 	<select id="selectComment" parameterType="_int" resultType="rcomment">
+ 		select 
+ 			r_comment_no as rCommentNo,
+ 			recipe_no as recipeNo,
+ 			rc_content as rcContent,
+ 			rc_date as rcDate,
+ 			member_no as memberNo,
+        (select member_nickname from member m where m.member_no = rc.member_no)as nickname 
+ 		from recipe_comment rc where recipe_no=#{recipeNo}
+ 	</select>
+ 	<insert id="insertComment" parameterType="rcomment">
+ 		insert into recipe_comment values(rc_seq.nextval,#{recipeNo},#{memberNo},#{rcContent},to_char(sysdate,'yyyy-mm-dd'))
+ 	</insert>
+ 	<delete id="deleteComment" parameterType="_int">
+ 		delete from recipe_comment where r_comment_no=#{rCommentNo}
+ 	</delete>
+ 	<update id="updateComment" parameterType="rcomment">
+ 		update recipe_comment set rc_content=#{rcContent} where r_comment_no=#{rCommentNo}
+ 	</update>
+ 	<update id="updateCount" parameterType="rb">
+ 		update recipe_board set read_count=read_count +1 where recipe_no=#{recipeNo}
+ 	</update>
+ 	<insert id="insertLike" parameterType="rlike">
+ 		insert into recipe_like values(r_like_seq.nextval,#{memberNo},#{recipeNo})
+ 	</insert>
+ 	<delete id="deleteLike" parameterType="rlike">
+ 		delete from recipe_like where recipe_no =#{recipeNo} and member_no=#{memberNo}
+ 	</delete>
+ 	<insert id="insertReport" parameterType="report">
+ 		insert into recipe_report values(report_seq.nextval,#{recipeNo},#{memberNo},#{reportComment})
+ 	</insert>
+ 	<update id="deleteRecipe" parameterType="_int">
+ 		update recipe_board set recipe_delete=0 where recipe_no=#{recipeNo}
+ 	</update>
+ 	<update id="updateRecipeBoard" parameterType="rb">
+ 		update recipe_board set 
+	 		recipe_title=#{recipeTitle}, subhead=#{subhead}, filepath=#{filepath}, 
+	 		recipe_video=#{recipeVideo}, food_name=#{foodName},situation=#{situation},
+	 		material=#{material}, recipe_level=#{recipeLevel} 
+ 		where recipe_no=#{recipeNo}
+ 	</update>
+ 	<update id="updateMaterial" parameterType="material">
+ 		update material set 
+ 			material_name=#{materialName}, m_amount=#{mAmount} 
+ 		where material_no=#{materialNo}
+ 	</update>
+ 	<update id="updateRecipeContent" parameterType="rcontent">
+ 		update recipe_content set recipe_content=#{recipeContent} where r_file_no=#{rFileNo}
+ 	</update>
+ 	<select id="selectProduct" parameterType="_int" resultType="product">
+ 		select 
+ 			product_no as productNo,
+ 			recipe_no as recipeNo,
+ 			milkit_name as milkitName,
+ 			milkit_price as milkitPrice,
+ 			milkit_comment as milkitComment,
+ 			filepath,
+ 			milkit_delete as milkitDelte
+ 		from product where recipe_no=#{recipeNo} and milkit_delete=1
+ 	</select>
+ 	<select id="selectMoreRecipe" parameterType="rb" resultType="rb">
+ 		select * from
+        (select 
+        	rownum rnum,
+ 			recipe_no as recipeNo, 
+ 			recipe_title as recipeTitle, 
+ 			filepath,
+ 			read_count as readCount,
+ 			recipe_time as recipeTime, 
+ 			recipe_level as recipeLevel,
+ 			situation,
+ 			material,
+		(select member_nickname from Member m  where m.member_no = r.recipe_writer) as nickname 
+		from (select * from recipe_board	
+		<if test="situation == 0 and material == 0  and recipeLevel == 0">
+		where recipe_delete=1 order by 1 desc)r)r where rnum between #{start} and #{end}	
+		</if>
+	<trim suffix="and recipe_delete=1 order by 1 desc)r)r where rnum between #{start} and #{end}" >
+	<choose>
+		<when test="situation gt 0 and material gt 0 and recipeLevel gt 0 ">
+		 where situation=#{situation} and  material=#{material} and recipe_level=#{recipeLevel}
+		</when>
+		<when test="situation gt 0">
+			where situation=#{situation}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="material gt 0">
+			where material=#{material}
+			<if test="situation gt 0">
+			and situation=#{situation}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="recipeLevel gt 0">
+			where recipe_level=#{recipeLevel}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>		
+	</choose>
+</trim>	
+ 	</select>
+ 	<select id="selectTotalCount" parameterType="rb" resultType="_int">
+ 		select count(*) from recipe_board
+ 		<if test="situation == 0 and material == 0  and recipeLevel == 0">
+		where recipe_delete=1
+		</if>
+	<trim suffix="and recipe_delete=1 " >
+	<choose>
+		<when test="situation gt 0 and material gt 0 and recipeLevel gt 0 ">
+		 where situation=#{situation} and  material=#{material} and recipe_level=#{recipeLevel}
+		</when>
+		<when test="situation gt 0">
+			where situation=#{situation}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="material gt 0">
+			where material=#{material}
+			<if test="situation gt 0">
+			and situation=#{situation}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>
+		<when test="recipeLevel gt 0">
+			where recipe_level=#{recipeLevel}
+			<if test="material gt 0">
+			and material=#{material}
+			</if>
+			<if test="recipeLevel gt 0">
+			and recipe_level=#{recipeLevel}
+			</if>
+		</when>		
+	</choose>
+</trim>
+ 	</select>
+ 	
+ 	<!-- 성승민 프로필 연동 레시피 게시물 수 -->
+ 	<select id="selectOneReceipeCnt" parameterType="_int" resultType="_int">
+ 		select count(*) 
+ 		from recipe_board 
+ 		where recipe_writer=#{recipeWriter}
+ 	</select>
+ 	 
+ 	<!-- 성승민 프로필 연동 레시피 게시물 + 좋아유 수 리스트 2021.12.21 --> 
+ 	<select id="selectAllList" parameterType="_int" resultType="rb">
+	 	select * 
+	 	from
+			(select rownum as rnum, rb.*
+				from(
+				(select recipe_no as recipeNo, recipe_writer as recipeWriter, filepath, read_count as readCount, recipe_video as recipeVideo, count(like_no) likeCnt, recipe_delete as recipeDelete
+					from recipe_board 
+					left outer join recipe_like
+					using(recipe_no) 
+					where recipe_writer in #{memberNo} and recipe_delete = 1
+					group by recipe_no, recipe_writer, filepath, read_count, recipe_video, recipe_delete
+				order by recipe_no desc) rb )) 
+		where rnum between 1 and 15
+ 	</select>
+ 	
+ 	<!-- 성승민 프로필 레시피 더보기 로딩 2021.12.21-->
+ 	<select id="selectAllAjaxList" parameterType="map" resultType="rb">
+	 	select * 
+	 	from
+			(select rownum as rnum, rb.*
+				from(
+				(select recipe_no as recipeNo, recipe_writer as recipeWriter, filepath, read_count as readCount, recipe_video as recipeVideo, count(like_no) likeCnt, recipe_delete as recipeDelete
+					from recipe_board 
+					left outer join recipe_like
+					using(recipe_no) 
+					where recipe_writer in #{memberNo} and recipe_delete = 1
+					group by recipe_no, recipe_writer, filepath, read_count, recipe_video, recipe_delete
+				order by recipe_no desc) rb )) 
+		where rnum between #{start} and #{end}
+ 	</select>
+</mapper>

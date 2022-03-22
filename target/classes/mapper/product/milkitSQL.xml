@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="milkit">
+  <select id="selectRecipeList" parameterType="_int" resultType="rb">
+  	select 
+  		recipe_no as recipeNo,
+  		recipe_writer as recipeWriter,
+  		recipe_title as recipeTitle,
+  		food_name as foodName,
+  		filepath,
+  		subhead
+  	from recipe_board where recipe_writer=#{memberNo} and recipe_delete=1
+  </select>
+  <select id="selectMilkitList1" resultType="product">
+	select 
+  		rownum,
+  		product_no as productNo,
+  		recipe_no as recipeNo,
+  		milkit_writer as milkitWriter,
+  		milkit_name as milkitName,
+  		milkit_price as milkitPrice,
+  		milkit_comment as milkitComment,
+  		filepath,
+  		milkit_content as milkitContent,
+  		milkit_date as milkitDate,
+  		milkit_stock as milkitStock,
+  		milkit_delete as milkitDelete
+  	from (select * from product  where milkit_delete=1 order by 1 desc) where rownum between 1 and 6
+  </select>
+  <select id="selectMilkitList2" resultType="product">
+  select rownum,p.* from(select 	
+        product_no as productNo,
+  		recipe_no as recipeNo,
+  		milkit_writer as milkitWriter,
+  		milkit_name as milkitName,
+  		milkit_price as milkitPrice,
+  		milkit_comment as milkitComment,
+  		filepath,
+  		milkit_content as milkitContent,
+  		milkit_date as milkitDate,
+  		milkit_stock as milkitStock,
+  		milkit_delete as milkitDelete,
+  	(select sum(order_option_amount) from order_option  where product_no = p.product_no)as amount
+	from product p where milkit_delete=1 order by amount desc nulls last)p where rownum between 1 and 6
+  </select>
+  <insert id="insertMilkit" parameterType="product">
+  	insert into product values(product_seq.nextval,#{recipeNo},#{milkitWriter},#{milkitName},#{milkitPrice},#{milkitComment},#{filepath},#{milkitContent},to_char(sysdate,'yyyy-mm-dd'),#{milkitStock},1)
+  </insert>
+  <select id="selectTotalCount" resultType="_int">
+  	select count(*) as total_count from product where milkit_delete = 1 
+  </select>
+  <select id="selectMoreProduct1" parameterType="hashmap" resultType="product">
+    select * from(select 
+  		rownum rnum, 
+  		product_no as productNo,
+  		recipe_no as recipeNo,
+  		milkit_writer as milkitWriter,
+  		milkit_name as milkitName,
+  		milkit_price as milkitPrice,
+  		milkit_comment as milkitComment,
+  		filepath,
+  		milkit_content as milkitContent,
+  		milkit_date as milkitDate,
+  		milkit_stock as milkitStock,
+  		milkit_delete as milkitDelete
+  	from (select * from product  where milkit_delete=1 order by 1 desc )p )p where rnum between #{start} and #{end}
+  </select>
+  <select id="selectMoreProduct2" parameterType="hashmap" resultType="product">
+  	 select * from(select rownum rnum,p.* from(select 	
+        product_no as productNo,
+  		recipe_no as recipeNo,
+  		milkit_writer as milkitWriter,
+  		milkit_name as milkitName,
+  		milkit_price as milkitPrice,
+  		milkit_comment as milkitComment,
+  		filepath,
+  		milkit_content as milkitContent,
+  		milkit_date as milkitDate,
+  		milkit_stock as milkitStock,
+  		milkit_delete as milkitDelete,
+  	(select sum(order_option_amount) from order_option  where product_no = p.product_no)as amount
+	from product p where milkit_delete=1 order by amount desc nulls last)p)p where rnum between #{start} and #{end}
+  </select>
+  <select id="selectOneProduct" parameterType="_int" resultType="product">
+  	select 
+  		product_no as productNo,
+  		recipe_no as recipeNo,
+  		milkit_writer as milkitWriter,
+  		milkit_name as milkitName,
+  		milkit_price as milkitPrice,
+  		milkit_comment as milkitComment,
+  		filepath,
+  		milkit_content as milkitContent,
+  		milkit_date as milkitDate,
+  		milkit_stock as milkitStock,
+  		milkit_delete as milkitDelete,
+  		(select member_nickname from member m where m.member_no=p.milkit_writer)as nickname,
+  		(select member_id from member m where m.member_no=p.milkit_writer)as memberId,
+  		(select member_level from member m where m.member_no=p.milkit_writer)as memberLevel
+  	from product p where product_no=#{productNo}
+  </select>
+  <select id="selectReview" parameterType="_int" resultType="review">
+  	select 
+  		review_no as reviewNo,
+  		product_no as productNo,
+  		member_nickname as memberNickname,
+  		review_content as reviewContent,
+  		review_rate as reviewRate,
+  		review_date as reviewDate
+  	from review where product_no=#{productNo} 		
+  </select>
+  <select id="selectRecipeBoard" parameterType="_int" resultType="rb">
+  	select 
+  		recipe_no as recipeNo,
+  		recipe_title as recipeTitle,
+  		filepath,
+  		subhead,
+  		recipe_delete as recipeDelete
+  	from recipe_board where recipe_no=#{recipeNo} and recipe_delete=1
+  </select>
+  <update id="deleteMilkit" parameterType="_int">
+  	update product set milkit_delete=0 where product_no=#{productNo}
+  </update>
+  <update id="updateMilkit" parameterType="product">
+  	update product set 
+	  	milkit_name=#{milkitName},milkit_price=#{milkitPrice},
+	  	milkit_comment=#{milkitComment},filepath=#{filepath},
+	  	milkit_content=#{milkitContent},milkit_stock=#{milkitStock} 
+  	where product_no=#{productNo}
+  </update>
+  <insert id="insertCart" parameterType="cart">
+  	insert into cart values(cart_seq.nextval,#{memberNo},#{productNo},#{productAmount},#{productPrice})
+  </insert>
+</mapper>

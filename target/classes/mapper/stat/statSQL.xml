@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="stat">
+  <select id="selectFreeCount" parameterType="hashmap" resultType="prev">
+  
+  select
+   (select count(*) from freeboard where reg_date =#{today})today,
+   (select count(*) from freeboard where reg_date =#{prev1day})prev1,
+   (select count(*) from freeboard where reg_date =#{prev2day})prev2,
+   (select count(*) from freeboard where reg_date =#{prev3day})prev3,
+   (select count(*) from freeboard where reg_date =#{prev4day})prev4,
+   (select count(*) from freeboard where reg_date =#{prev5day})prev5,
+   (select count(*) from freeboard where reg_date =#{prev6day})prev6,
+   (select count(*) from freeboard where reg_date =#{prev7day})prev7
+   
+   from dual
+  
+  </select>
+  
+  <select id="selectFjr" parameterType="hashmap" resultType="prev">
+  select
+   (select count(*) from freeboard where reg_date= #{today})today,
+   (select count(*) from member where enroll_date= #{today})prev1,
+   (select count(*) from recipe_board where recipe_date= #{today})prev2
+   
+   from dual
+  
+  
+  </select>
+  
+  <select id="selectRecipeCount" parameterType="hashmap" resultType="prev">
+  
+  select
+   (select count(*) from recipe_board where recipe_date =#{today})today,
+   (select count(*) from recipe_board where recipe_date =#{prev1day})prev1,
+   (select count(*) from recipe_board where recipe_date =#{prev2day})prev2,
+   (select count(*) from recipe_board where recipe_date =#{prev3day})prev3,
+   (select count(*) from recipe_board where recipe_date =#{prev4day})prev4,
+   (select count(*) from recipe_board where recipe_date =#{prev5day})prev5,
+   (select count(*) from recipe_board where recipe_date =#{prev6day})prev6,
+   (select count(*) from recipe_board where recipe_date =#{prev7day})prev7
+   
+   from dual
+  
+  </select>
+  
+  <select id="selectJoinCount" parameterType="hashmap" resultType="prev">
+  
+  select
+   (select count(*) from member where enroll_date =#{today})today,
+   (select count(*) from member where enroll_date =#{prev1day})prev1,
+   (select count(*) from member where enroll_date =#{prev2day})prev2,
+   (select count(*) from member where enroll_date =#{prev3day})prev3,
+   (select count(*) from member where enroll_date =#{prev4day})prev4,
+   (select count(*) from member where enroll_date =#{prev5day})prev5,
+   (select count(*) from member where enroll_date =#{prev6day})prev6,
+   (select count(*) from member where enroll_date =#{prev7day})prev7
+   
+   from dual
+  
+  </select>
+  
+  <select id="statVisitCount" parameterType="hashmap" resultType="prev">
+  select
+   (select visit_count from visit_count where visit_date =#{today})today,
+   (select visit_count from visit_count where visit_date =#{prev1day})prev1,
+   (select visit_count from visit_count where visit_date =#{prev2day})prev2,
+   (select visit_count from visit_count where visit_date =#{prev3day})prev3,
+   (select visit_count from visit_count where visit_date =#{prev4day})prev4,
+   (select visit_count from visit_count where visit_date =#{prev5day})prev5,
+   (select visit_count from visit_count where visit_date =#{prev6day})prev6,
+   (select visit_count from visit_count where visit_date =#{prev7day})prev7
+   
+   from dual
+  
+  
+  </select>
+  
+  <select id="statLoginCount" parameterType="hashmap" resultType="prev">
+  select
+   (select login_count from visit_count where visit_date =#{today})today,
+   (select login_count from visit_count where visit_date =#{prev1day})prev1,
+   (select login_count from visit_count where visit_date =#{prev2day})prev2,
+   (select login_count from visit_count where visit_date =#{prev3day})prev3,
+   (select login_count from visit_count where visit_date =#{prev4day})prev4,
+   (select login_count from visit_count where visit_date =#{prev5day})prev5,
+   (select login_count from visit_count where visit_date =#{prev6day})prev6,
+   (select login_count from visit_count where visit_date =#{prev7day})prev7
+   
+   from dual
+  
+  
+  </select>
+  
+  
+  <select id="selectVisitCount" resultType="vc">
+  select visit_date as visitDate, visit_count as visitCount , login_count as loginCount from visit_count where visit_date = to_char(sysdate,'yyyy-mm-dd')
+  
+  
+  </select>
+  
+  <insert id="addVisitCount">
+  
+  insert into visit_count values(visit_count_seq.nextval,to_char(sysdate,'yyyy-mm-dd'),0,0)
+  
+  </insert>
+  
+  <update id="increaseVisitCount" parameterType="vc">
+  update visit_count set visit_count = #{visitCount}+1  where visit_date = to_char(sysdate,'yyyy-mm-dd') 
+  </update>
+  
+  <update id="updateVisitCount" parameterType="vc">
+  
+  update visit_count set visit_count = #{visitCount}-1 , login_count = #{loginCount }+1 where visit_date = to_char(sysdate,'yyyy-mm-dd')
+  </update>
+  
+  <select id="rankingBoard" resultType="fb">
+  
+  select * from (select free_no as freeNo, free_title as freeTitle, free_readcount as freeReadcount from freeboard order by freeReadcount desc) where rownum between 1 and 10
+  </select>
+  <select id="rankingRecipe" resultType="rb">
+  select * from (select recipe_no as recipeNo , recipe_title as recipeTitle, read_count as readCount from recipe_board order by readCount desc) where rownum between 1 and 10
+  </select>
+  <select id="rankingFollow" resultType="m2">
+  select * from(
+select member_no as memberNo , member_id as memberId,(select count(*) from follow where follow_no = member.member_no)memberPoint from member order by memberPoint desc) where rownum between 1 and 10
+  </select>
+  <select id="rankingMilkit" resultType="pd">
+  select * from (select product_no as productNo,milkit_name as milkitName, (select nvl(sum(order_option_amount),0)  from order_option where product_no = product.product_no)milkitStock from product order by milkitStock desc) where rownum between 1 and 10
+  </select>
+  <select id="selectNotice"  resultType="n">
+		select *
+  		from
+	  	(select 
+	  		rownum as rnum,
+	  		n.*
+	  	from
+		  	(select
+		  		notice_no as noticeNo,
+		  		notice_title as noticeTitle,
+		  		notice_writer as noticeWriter,
+		  		notice_priority as noticePriority,
+		  		reg_date as regDate,
+		  		notice_readcount as noticeReadcount
+		  	from notice order by notice_no desc)n)
+		where rnum between 1 and 5
+	</select>
+  
+  <select id="subs" resultType="m2">
+  select member_id as memberId, member.postcode, member.address_road as addressRoad,
+member.address_detail as addressDetail ,member.member_phone as memberPhone,member.member_name as memberName,membership_end as withdrawDate
+from sub_payment join membership using(membership_no) join member using(member_no) where membership_end <![CDATA[>]]> to_char(sysdate,'yyyy-mm-dd')
+  </select>
+  
+  
+</mapper>

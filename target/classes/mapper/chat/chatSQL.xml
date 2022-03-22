@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="chat">
+	<select id="chatUserList" parameterType="_int" resultType="chat">
+		select chat_no as chatNo, chat_send as chatSend, chat_receive as chatReceive, chat_content as chatContent, chat_date as chatDate
+		from chat where chat_receive = #{sessionMemberNo} or chat_send = #{sessionMemberNo} order by chat_no
+	</select>
+	<select id="chatAdminHomeList" parameterType="_int" resultType="chat">
+		select cc.chat_no as chatNo, cc.chat_send as chatSend, cc.chat_receive as chatReceive, cc.chat_content as chatContent, cc.chat_date as chatDate, m.member_nickname as memberNickname
+		from (select max(chat_no) as chat_no, chat_send, chat_receive
+		    from chat
+		    where chat_send=#{sessionMemberNo} or chat_receive=#{sessionMemberNo} group by chat_send, chat_receive order by chat_no desc) c
+		join chat cc on c.chat_no=cc.chat_no
+		join member m on m.member_no=cc.chat_send
+	</select>
+	<select id="chatAdminList" parameterType="chat" resultType="chat">
+		select c.chat_no as chatNo, c.chat_send as chatSend, c.chat_receive as chatReceive, c.chat_content as chatContent, c.chat_date as chatDate, m.member_nickname as memberNickname
+		from chat c
+		join member m on m.member_no = c.chat_send or m.member_no = c.chat_receive
+		where (c.chat_receive in(#{chatReceive},#{chatSend}) and c.chat_send in(#{chatReceive},#{chatSend})) and m.member_no=chat_send order by chat_no
+	</select>
+	<insert id="chatSend" parameterType="chat">
+		insert into chat values(chat_seq.nextval,#{chatSend},#{chatReceive},#{chatContent},sysdate)
+		<selectKey resultType="_int" order="AFTER" keyProperty="chatNo">
+			select max(chat_no) from chat
+		</selectKey>
+	</insert>
+	<select id="oneSelect" parameterType="_int" resultType="chat">
+		select c.chat_no as chatNo, c.chat_send as chatSend, c.chat_receive as chatReceive, c.chat_content as chatContent, c.chat_date as chatDate, m.member_nickname as memberNickname
+		from chat c
+		join member m on m.member_no = c.chat_send
+		where c.chat_no=#{chatNo}
+	</select>
+	<select id="onePrevSelect" parameterType="_int" resultType="chat">
+		select chat_date as chatDate from (select rownum as rnum, c.* from (select * from chat where chat_send=#{chatSend} order by chat_no desc)c)c2 where rnum=2
+	</select>
+	
+	<!-- chatbot -->
+	<select id="chatbotSelect" resultType="chatbot">
+		select chatbot_no as chatbotNo, chat_keyword as chatKeyword, chat_content as chatContent
+	from chatbot where chat_keyword in('start1','start2')
+	</select>
+	<select id="chatbotOneSelect" resultType="chatbot">
+		select chatbot_no as chatbotNo, chat_keyword as chatKeyword, chat_content as chatContent
+	from chatbot where chat_keyword=#{chatKeyword}
+	</select>
+	<select id="keywordList" resultType="string">
+		select chat_keyword as chatKeyword from chatbot
+	</select>
+	
+	<select id="adminMemberNo" parameterType="string" resultType="_int">
+		select member_no as memberNo from member where member_id=#{adminId}
+	</select>
+</mapper>

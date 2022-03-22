@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="coupon">
+  
+  <insert id="createCoupon" parameterType="map" >
+ 
+  insert into coupon values(coupon_seq.nextval,#{couponName},to_char(sysdate,'yyyy-mm-dd'),#{limitDate},#{dcResult},
+  <if test="limit==2">
+  2147483645)
+  </if>
+  <if test="limit==1">#{amount} )</if>
+  
+  
+  </insert>
+  
+  
+  <insert id="dropCoupon" parameterType="hashmap">
+  
+  insert into coupon_list values(coupon_list_seq.nextval,#{memberNo},#{couponNo},0,null)
+  
+  
+  
+  
+  
+  </insert>
+  <update id="dropPoint" parameterType="hashmap">
+  
+  
+  update member set member_point = #{sum} where member_no = #{memberNo} 
+  
+  </update>
+  
+  <select id="selectOneMember" parameterType="hashmap" resultType="m2">
+  select member_no as memberNo,
+member_id as memberId,
+member_pw as memberPw,
+member_email as memberEmail,
+member_name as memberName,
+member_nickname as memberNickname,
+member_phone as memberPhone,
+member_birth as memberBirth,
+postcode,
+address_road as addressRoad,
+address_detail as addressDetail,
+member_consent as memberConsent,
+profile_path as profilePath,
+profile_intro as profileIntro,
+certificate_path as certificatePath,
+member_level as memberLevel,
+member_point as memberPoint,
+enroll_date as enrollDate,
+withdraw_date as withdrawDate,
+member_black as memberBlack
+  from member where member_no = #{memberNo}
+  </select>
+  
+  <select id="couponLast" resultType="string">
+  select max(coupon_no) from coupon
+  
+  </select>
+  
+  
+  <select id="selectMemberNo" parameterType="hashmap" resultType="string">
+   
+  
+  select member_no as memberNo from 
+  <choose>
+  <when test="who==0">
+  member where member_black =0
+  </when>
+  <when test="who==1">
+  member where member_black =0 and member_level = 1
+  </when>
+  <when test="who==2">
+  member where member_black =0 and member_level = 2
+  </when>
+  <when test="who==3">
+  (select member_no , (select count(*)  from order_tbl where member_no = member_no)orderCount from member where member_black = 0) where orderCount <![CDATA[<]]>1 
+  </when>
+  <when test="who==4">
+  (select member_no , (select count(*)  from order_tbl where member_no = member_no)orderCount from member where member_black = 0) where orderCount <![CDATA[>=]]>1
+  </when>
+  </choose>
+  </select>
+  
+  <select id="selectAllCoupon" resultType="c">
+  
+select couponNo,couponName,couponStart,couponEnd,couponAmount,
+(select count(*) from coupon_list where coupon_no = couponNo and coupon_use =0)noUseCount,
+  (select count(*) from coupon_list where coupon_no = couponNo and coupon_use =1)useCount
+from(select rownum as rnum, coupon_no as couponNo,
+  coupon_name as couponName,
+  coupon_start as couponStart,
+  coupon_end as couponEnd,
+  coupon_discount as couponDiscount,
+  coupon_amount as couponAmount
+  
+  from coupon where coupon_end <![CDATA[>=]]> to_char(sysdate,'yyyy-mm-dd') ) where
+  
+  
+   rnum between #{start} and #{end}
+   order by couponStart desc
+  
+  </select>
+  <select id="selectCouponTotalCount" resultType="_int">
+  
+  select count(*)
+  from coupon where coupon_end <![CDATA[>=]]> to_char(sysdate,'yyyy-mm-dd')
+  
+  </select>
+  
+  <delete id="deleteCoupon" >
+  
+  delete from coupon where coupon_no in 
+	<foreach collection="array" item="couponNo" open="(" close=")" separator=",">#{couponNo}</foreach>
+	
+  
+  </delete>
+  
+</mapper>

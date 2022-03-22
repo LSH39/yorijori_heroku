@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="freeboard">
+	<select id="freeList" parameterType="map" resultType="fb">
+		  select * from
+		    (select rownum as rnum, ff.* from
+		    (select
+				  		free_no as freeNo,
+				  		free_writer as freeWriter,
+				  		free_title as freeTitle,
+				  		free_content as freeContent,
+				  		reg_date as regDate,
+				  		free_readcount as freeReadcount,
+				  		(select member_level from member where member_id=free_writer) as memberLevel,
+		                (select member_nickname from member where member_id=free_writer) as memberNickname,
+		                (select profile_path from member where member_id=free_writer) as profilePath,
+		                (select count(*) from freeboard_comment fc where fc.free_no=f.free_no) as fcCount,
+		                (select count(*) from freeboard_like fl where fl.free_no=f.free_no) as freeLikeCount 
+		    from freeboard f
+		    <choose>
+		    	<when test="orderIndex==0">
+		    		order by freeNo desc
+		    	</when>
+		    	<when test="orderIndex==1">
+		    		order by fcCount desc
+		    	</when>
+		    	<when test="orderIndex==2">
+		    		order by freeLikeCount desc
+		    	</when>	
+		    </choose>
+		    )ff)
+		    where rnum between #{start} and #{end}
+	</select>
+	<select id="totalCount" resultType="_int">
+		select count(*) from freeboard
+	</select>
+	<select id="commentList" parameterType="_int" resultType="fc">
+		select
+	        fc_no as fcNo,
+	        free_no as freeNo,
+	        fc_writer as fcWriter,
+	        fc_content as fcContent,
+	        reg_date as regDate,
+	        (select count(*) from fc_like where fc.fc_no = fc_no) as fcLikeCount,
+	        (select profile_path from member where fc.fc_writer = member_id) as profilePath,
+	        (select member_level from member where fc.fc_writer= member_id) as memberLevel,
+	        (select member_nickname from member where fc.fc_writer= member_id) as memberNickname
+        from freeboard_comment fc
+        where free_no=#{freeNo} order by 1
+	</select>
+	<select id="fileList" parameterType="_int" resultType="ff">
+		select
+			ff_no as ffNo,
+			free_no as freeNo,
+			ff_filename as ffFilename,
+			ff_filepath as ffFilepath
+		from freeboard_file
+		where free_no=#{freeNo} order by 1
+	</select>
+	<select id="selectOneFree" parameterType="_int" resultType="fb">
+		 select * from
+		    (select
+				  		free_no as freeNo,
+				  		free_writer as freeWriter,
+				  		free_title as freeTitle,
+				  		free_content as freeContent,
+				  		reg_date as regDate,
+				  		free_readcount as freeReadcount,
+		                (select member_nickname from member where member_id=free_writer) as memberNickname,
+		                (select member_level from member where member_id=free_writer) as memberLevel,
+		                (select profile_path from member where member_id=free_writer) as profilePath,
+		                (select count(*) from freeboard_comment fc where fc.free_no=f.free_no) as fcCount,
+		                (select count(*) from freeboard_like fl where fl.free_no=f.free_no) as freeLikeCount 
+		    from freeboard f)
+   	 		where freeNo=#{freeNo}
+	</select>
+	<insert id="freeboardLike" parameterType="map">
+		insert into freeboard_like values (freelike_seq.nextval, #{freeNo}, #{memberId})
+	</insert>
+	<select id="oneFreeLike" parameterType="map" resultType="_int">
+		select count(*) from freeboard_like
+		where free_no = #{freeNo} and free_liker=#{memberId}
+	</select>
+	<insert id="freeboardComment" parameterType="fc">
+		insert into freeboard_comment values (fc_seq.nextval, #{freeNo}, #{fcWriter}, #{fcContent}, to_char(sysdate, 'yyyy-mm-dd PM HH:MI'))
+	</insert>
+	<update id="rcUpdate" parameterType="_int">
+		update freeboard set free_readcount = free_readcount + 1
+		where free_no = #{freeNo}
+	</update>
+	<delete id="delFreeboardComment" parameterType="_int">
+		delete from freeboard_comment where fc_no = #{fcNo}
+	</delete>
+	<update id="updateFreeboardComment" parameterType="map">
+		update freeboard_comment set fc_content = #{fcContent}
+		where fc_no = #{fcNo}
+	</update>
+	<select id="selectFcLikeList" parameterType="map" resultType="fcl">
+		select 
+	        fclike_no as fclikeNo,
+	        fc_no as fcNo,
+	        fc_liker as fcLiker
+	    from
+	        fc_like fl 
+	        where fl.fc_no in (select fc.fc_no from freeboard_comment fc where fc.free_no=#{freeNo})
+	        and fc_liker=#{memberId}
+	</select>
+	<insert id="insertFcLike" parameterType="map">
+		insert into fc_like values(fclike_seq.nextval, #{fcNo}, #{memberId})
+	</insert>
+	<insert id="insertFree" parameterType="fb">
+		insert into freeboard values(free_seq.nextval, #{freeWriter}, #{freeTitle}, #{freeContent}, to_char(sysdate, 'yyyy-mm-dd'), 0)
+	</insert>
+	<insert id="insertFreeFile" parameterType="ff">
+		insert into freeboard_file values (ff_seq.nextval, #{freeNo}, #{ffFilename}, #{ffFilepath})
+	</insert>
+	<select id="selectFreeNo" parameterType="fb" resultType="_int">
+		select free_no as freeNo from freeboard
+		where free_writer = #{freeWriter} and free_title = #{freeTitle}
+		order by free_no desc
+	</select>
+	<select id="searchList" parameterType="map" resultType="fb">
+		select *
+  		from
+	  	(select 
+	  		rownum as rnum,
+	  		n.*
+	  	from
+		  	(select
+		  		free_no as freeNo,
+		  		free_title as freeTitle,
+		  		free_writer as freeWriter,
+		  		free_content as freeContent,
+		  		reg_date as regDate,
+		  		free_readcount as freeReadcount,
+		  		(select member_level from member where member_id=free_writer) as memberLevel,
+                (select member_nickname from member where member_id=free_writer) as memberNickname    
+		  	from freeboard
+            order by free_no desc)n)
+		where rnum between #{start} and #{end}
+        <choose>
+           <when test="searchtype.equals('writerNickname')"> 
+        and memberNickname like '%' || #{searchword} || '%'
+            </when>
+            <when test="searchtype.equals('writerId')">
+        and freeWriter like '%' || #{searchword} || '%'
+            </when>
+            <when test="searchtype.equals('title')">
+        and freeTitle like '%' || #{searchword} || '%'
+            </when>
+            <when test="searchtype.equals('content')">
+        and freeContent like '%' || #{searchword} || '%'
+            </when>
+        </choose>
+	</select>
+	<select id="searchCount" parameterType="map" resultType="_int">
+		select count(*) from
+		(select
+		  		free_no as freeNo,
+		  		free_title as freeTitle,
+		  		free_writer as freeWriter,
+		  		free_content as freeContent,
+		  		reg_date as regDate,
+		  		free_readcount as freeReadcount,
+		  		(select member_level from member where member_id=free_writer) as memberLevel, 
+                (select member_nickname from member where member_id=free_writer) as memberNickname    
+		  	from freeboard
+		  <choose>
+           <when test="searchtype.equals('writerNickname')"> 
+        )n where memberNickname like '%' || #{searchword} || '%'
+            </when>
+            <when test="searchtype.equals('writerId')">
+        where free_writer like '%' || #{searchword} || '%')n
+            </when>
+            <when test="searchtype.equals('title')">
+        where free_title like '%' || #{searchword} || '%')n
+            </when>
+            <when test="searchtype.equals('content')">
+        where free_content like '%' || #{searchword} || '%')n
+            </when>
+        </choose>
+	</select>
+	<select id="selectFreeboardFile" parameterType="_int" resultType="ff">
+		select
+			ff_no as ffNo,
+			free_no as freeNo,
+			ff_filename as ffFilename,
+			ff_filepath as ffFilepath
+		from freeboard_file
+		where ff_no = #{ffNo}
+	</select>
+	<update id="updateFreeboard" parameterType="fb">
+		update freeboard
+		set free_title = #{freeTitle},
+			free_content = #{freeContent}
+		where free_no = #{freeNo}
+	</update>
+	<delete id="deleteFreeboardFile" parameterType="_int">
+		delete from freeboard_file
+		where free_no = #{freeNo}
+	</delete>
+	<delete id="deleteFcLike" parameterType="map">
+		delete from fc_like
+		where
+		fc_no = #{fcNo} and fc_liker = #{memberId}
+	</delete>
+</mapper>
+
