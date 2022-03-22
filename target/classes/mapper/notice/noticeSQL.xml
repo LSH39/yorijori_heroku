@@ -5,7 +5,7 @@
 		select *
   		from
 	  	(select 
-	  		rownum as rnum,
+	  		@ROWNUM:=@ROWNUM+1 as rnum,
 	  		n.*
 	  	from
 		  	(select
@@ -15,7 +15,7 @@
 		  		notice_priority as noticePriority,
 		  		reg_date as regDate,
 		  		notice_readcount as noticeReadcount
-		  	from notice order by noticePriority desc, notice_no desc)n)
+		  	from notice order by noticePriority desc, notice_no desc)n, (SELECT @ROWNUM:=0) R)
 		where rnum between #{start} and #{end}
 	</select>
 	<select id="totalCount" resultType="_int">
@@ -77,7 +77,7 @@
 		select *
   		from
 	  	(select 
-	  		rownum as rnum,
+	  		@ROWNUM:=@ROWNUM+1 as rnum,
 	  		n.*
 	  	from
 		  	(select
@@ -90,7 +90,7 @@
 		  		notice_readcount as noticeReadcount,
                 (select member_nickname from member where member_id=notice_writer) as memberNickname    
 		  	from notice 
-            order by noticePriority desc, notice_no desc)n)
+            order by noticePriority desc, notice_no desc)n, (SELECT @ROWNUM:=0) R)
 		where rnum between #{start} and #{end}
         <choose>
            <when test="searchtype.equals('writerNickname')"> 

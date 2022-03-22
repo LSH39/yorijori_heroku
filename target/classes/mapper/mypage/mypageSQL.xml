@@ -499,7 +499,7 @@
 
 	<select id="orderList1" parameterType="map" resultType="mo">
 		select *
-		  from (select rownum as rnum, 
+		  from (select @ROWNUM:=@ROWNUM+1 as rnum, 
 		               o.*
 		          from (select
 								a.ORDER_NO as orderNo,
@@ -522,7 +522,7 @@
                                     and b.order_no= a.ORDER_NO 
                                  ) as cancleOrder
 			               from order_tbl a
-			              where a.member_No=#{memberNo} order by a.order_No desc) o
+			              where a.member_No=#{memberNo} order by a.order_No desc) o, (SELECT @ROWNUM:=0) R
 		              )
 		where rnum
 		between #{start} and #{end}
@@ -533,7 +533,7 @@
 	<select id="myCouponList" resultType="mcou" parameterType="map">
 			select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		c.*
 		from
 		(select
@@ -547,7 +547,7 @@
 		couponUse
 		from
 		coupon c,coupon_list cl where c.coupon_No =cl.coupon_no and
-		member_No=#{memberNo} and cl.coupon_use=0 order by coupon_end desc)c)
+		member_No=#{memberNo} and cl.coupon_use=0 order by coupon_end desc)c), (SELECT @ROWNUM:=0) R
 		where rnum between
 		#{start} and #{end}
 	
@@ -562,7 +562,7 @@
 	<select id="myContestList" resultType="myc" parameterType="map">
 		select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		c.*
 		from
 		(select
@@ -576,7 +576,7 @@
 		cr.contest_result as contestResult
 		from contest_recipe cr,recipe_board rb where cr.recipe_no=rb.recipe_no
 		and
-		recipe_writer=#{recipeWriter} order by contest_no asc)c)
+		recipe_writer=#{recipeWriter} order by contest_no asc)c, (SELECT @ROWNUM:=0) R)
 		where rnum
 		between #{start} and #{end}
 
@@ -589,7 +589,7 @@
 	<select id="myBoardList" resultType="fb" parameterType="map">
 		select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		f.*
 		from
 		(select
@@ -602,7 +602,7 @@
 		freeReadcount,
         (select member_nickname from member where member_id=free_writer)as freeWriter
 		from
-		freeboard where free_writer=#{freeWriter} order by free_no desc)f)
+		freeboard where free_writer=#{freeWriter} order by free_no desc)f, (SELECT @ROWNUM:=0) R)
 		where rnum between #{start} and #{end}
 	
 
@@ -625,7 +625,7 @@
 	<select id="likeRecipe" resultType="lr" parameterType="map">
 		select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		r.*
 		from
 		(select
@@ -646,7 +646,7 @@
 		from recipe_board rb,recipe_like rl where
 		rb.recipe_no=rl.recipe_no and
 		rl.member_no=#{memberNo} and rb.recipe_delete=1 order by
-		recipe_date desc)r)
+		recipe_date desc)r, (SELECT @ROWNUM:=0) R)
 
 		where rnum between #{start} and #{end}
 
@@ -669,7 +669,7 @@
 	<select id="selectPointList" resultType="mp" parameterType="map">
 		select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		p.*
 		from (select
 		point_no as pointNo,
@@ -679,7 +679,7 @@
 		point_content as pointContent,
 		point_date as pointDate
 		from point
-		where member_no=#{memberNo} order by point_no desc)p
+		where member_no=#{memberNo} order by point_no desc)p, (SELECT @ROWNUM:=0) R
 		)
 		where rnum between #{start} and #{end}
 
@@ -729,7 +729,7 @@
 		select *
 		from
 		(select
-		rownum as rnum,
+		@ROWNUM:=@ROWNUM+1 as rnum,
 		c.*
 		from
 		(select
@@ -741,7 +741,7 @@
 		class_thumbnail_filename as classThumbnailFilename,
         class_thumbnail_filepath as classThumbnailFilepath
 		from cooking_class where
-		member_nickname=#{memberNickname} order by class_no asc) c)
+		member_nickname=#{memberNickname} order by class_no asc) c, (SELECT @ROWNUM:=0) R)
 		where rnum
 		between #{start} and #{end}
 
@@ -814,7 +814,7 @@
 	<select id="sellerList1" resultType="ms" parameterType="map">
 		select *
 		from
-		(select rownum as rnum,
+		(select @ROWNUM:=@ROWNUM+1 as rnum,
 		s.*
 		from
 		( select a.ORDER_OPTION_NO as
@@ -850,7 +850,7 @@
 		where
 
 		a.order_no =b.order_no and a.product_no=c.product_no and
-		c.milkit_writer=#{milkitWriter} order by a.order_no desc)s)
+		c.milkit_writer=#{milkitWriter} order by a.order_no desc)s, (SELECT @ROWNUM:=0) R)
 		where rnum
 		between #{start} and #{end}
 	
@@ -896,7 +896,7 @@
 
 	<select id="selectmembership" parameterType="map" resultType="mym">
         select *
-		  from (select rownum as rnum, 
+		  from (select @ROWNUM:=@ROWNUM+1 as rnum, 
 		               mem.*
 		          from (select
 								a.membership_no as membershipNo,
@@ -916,7 +916,7 @@
 								b.address_detail  as addressDetail,
                                 (select count(*) from sub_payment p where membership_end <![CDATA[>= to_char(sysdate,'yyyy-mm-dd') and p.payment_no=b.payment_no) as subStatus]]>
 			               from membership a,sub_payment b
-			              where b.membership_no=a.membership_no and b.member_no=#{memberNo}) mem
+			              where b.membership_no=a.membership_no and b.member_no=#{memberNo}) mem, (SELECT @ROWNUM:=0) R
 		              )
 		where rnum
 		between #{start} and #{end}

@@ -7,7 +7,7 @@
 	</select>
 	<select id="selectList" parameterType="map" resultType="rc">
 		select ff.* from
-        (select rownum as rnum, f.* from
+        (select @ROWNUM:=@ROWNUM+1 as rnum, f.* from
         (select ccc.* from
        (select
             cc.*,
@@ -32,7 +32,7 @@
         where recipe_delete=1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
        	<choose>
 	       	<when test="orderIndex==0">
-	       		order by contestNo desc)ccc)f)ff
+	       		order by contestNo desc)ccc)f, (SELECT @ROWNUM:=0) R)ff
 	       	</when>
 	       	<when test="orderIndex==1">
 	       		order by recipeTitle)ccc)f)ff
@@ -54,7 +54,7 @@
 	</select>
 	<select id="searchList" parameterType="map" resultType="rc">
 		select ff.* from
-        (select rownum as rnum, f.* from
+        (select @ROWNUM:=@ROWNUM+1 as rnum, f.* from
         (select ccc.* from
        (select
             cc.*,
@@ -80,7 +80,7 @@
         order by contestNo desc)ccc
 	        <choose>
 	           <when test="searchtype.equals('writerNickname')"> 
-	         where memberNickname like '%' || #{searchword} || '%')f)ff
+	         where memberNickname like '%' || #{searchword} || '%')f, (SELECT @ROWNUM:=0) )ff
 	            </when>
 	            <when test="searchtype.equals('writerId')">
 	        where memberId like '%' || #{searchword} || '%')f)ff
@@ -166,7 +166,7 @@
 	</insert>
 	<select id="selectContestRecipeList" resultType="rc">
 	select cc.* from
-(select rownum as rnum,
+(select @ROWNUM:=@ROWNUM+1 as rnum,
 c.*,
 (select m.member_id from member m where m.member_no=memberNo) as memberId,
 (select m.member_nickname from member m where m.member_no=memberNo) as memberNickname,
@@ -185,7 +185,7 @@ cr.enter_date as enterDate,
 (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
 from contest_recipe cr
 where contest_month like to_char(sysdate, 'yyyy-mm')
-order by voteCount desc, contestNo)c)cc
+order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
 where rnum between 1 and 3
 	</select>
 	<insert id="insertContest" parameterType="_int">
@@ -203,7 +203,7 @@ where rnum between 1 and 3
 	<select id="selectSpecialWinners" resultType="rc">
 		<![CDATA[
 		select cc.* from
-(select rownum as rnum,
+(select @ROWNUM:=@ROWNUM+1 as rnum,
 c.*,
 (select m.member_id from member m where m.member_no=memberNo) as memberId,
 (select m.member_nickname from member m where m.member_no=memberNo) as memberNickname,
@@ -222,7 +222,7 @@ cr.enter_date as enterDate,
 (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
 from contest_recipe cr
 where contest_month like to_char(sysdate, 'yyyy-mm')
-order by voteCount desc, contestNo)c)cc
+order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
 where voteCount >= 30 and recipeDelete = 1 ]]>
 	</select>
 	<update id="updateMemberPoints" parameterType="map">

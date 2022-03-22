@@ -334,6 +334,7 @@
 		}
 	})
 	
+	/* sql에서 date타입 에러로 주석처리
   	//방문자수 기록용 쿠키 스크립트
   	function setCookie(cname,cvalue,exdays){
   	    var d = new Date();
@@ -398,4 +399,5 @@
   	}
   	}
   	//쿠키 스크립트 끝
-  </script>
+  	*/
+</script>

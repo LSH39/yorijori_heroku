@@ -3,7 +3,7 @@
 <mapper namespace="freeboard">
 	<select id="freeList" parameterType="map" resultType="fb">
 		  select * from
-		    (select rownum as rnum, ff.* from
+		    (select @ROWNUM:=@ROWNUM+1 as rnum, ff.* from
 		    (select
 				  		free_no as freeNo,
 				  		free_writer as freeWriter,
@@ -28,7 +28,7 @@
 		    		order by freeLikeCount desc
 		    	</when>	
 		    </choose>
-		    )ff)
+		    )ff, (SELECT @ROWNUM:=0) R)
 		    where rnum between #{start} and #{end}
 	</select>
 	<select id="totalCount" resultType="_int">
@@ -123,7 +123,7 @@
 		select *
   		from
 	  	(select 
-	  		rownum as rnum,
+	  		@ROWNUM:=@ROWNUM+1 as rnum,
 	  		n.*
 	  	from
 		  	(select
@@ -136,7 +136,7 @@
 		  		(select member_level from member where member_id=free_writer) as memberLevel,
                 (select member_nickname from member where member_id=free_writer) as memberNickname    
 		  	from freeboard
-            order by free_no desc)n)
+            order by free_no desc)n, (SELECT @ROWNUM:=0) R)
 		where rnum between #{start} and #{end}
         <choose>
            <when test="searchtype.equals('writerNickname')"> 

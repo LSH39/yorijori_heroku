@@ -156,7 +156,7 @@ from member) where ${searchType} like '%'||#{searchText}||'%'
 
 	</select>
 	<select id="selectDetailMember" parameterType="hashmap" resultType="m2">
-	select * from ( select rownum as rnum, memberNo,memberId,memberPw,memberEmail,memberName,memberNickname,
+	select * from ( select @ROWNUM:=@ROWNUM+1 as rnum, memberNo,memberId,memberPw,memberEmail,memberName,memberNickname,
 memberPhone,memberBirth,
 postcode,addressRoad,addressDetail,memberConsent,profilePath,profileIntro,
 certificatePath,memberLevel,memberPoint,enrollDate,withdrawDate,memberBlack, boardCount,recipeCount, fcCount,rc from (select member_no as memberNo,
@@ -254,7 +254,7 @@ and memberLevel = 5
 </when>
 
 </choose>
-) where rnum between #{start2} and #{end2}
+), (SELECT @ROWNUM:=0) R where rnum between #{start2} and #{end2}
 
 	</select>
 	
@@ -457,7 +457,12 @@ and memberLevel = 5
 		member_pw=#{memberPw}
 
 	</update>
+	
+	<!-- rownum 수정 정확한지.... -->
 	<select id="selectReport" resultType="report2">
-	select member.member_no as memberNo,member.member_id as memberId,recipe_no as recipeNo,recipe_title as recipeTitle, report_comment as reportComment from recipe_report join recipe_board using(recipe_no) join member on (recipe_writer = member.member_no) where member_black =0 and rownum <![CDATA[<=]]>5
+		select member.member_no as memberNo,member.member_id as memberId,recipe_no as recipeNo,recipe_title as recipeTitle, report_comment as reportComment
+		from recipe_report, (SELECT @ROWNUM:=0) R
+		join recipe_board using(recipe_no)
+		join member on (recipe_writer = member.member_no) where member_black =0 and @ROWNUM:=@ROWNUM+1 <![CDATA[<=]]>5
 	</select>
 </mapper>

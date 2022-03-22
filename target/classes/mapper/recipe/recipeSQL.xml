@@ -3,8 +3,8 @@
 <mapper namespace="recipe">
  	<select id="selectRecipeList" parameterType="rb" resultType="rb">
  		select 
- 		rownum,
-        r. * from
+ 		@ROWNUM,
+        r.* from
         (select 
  			recipe_no as recipeNo, 
  			recipe_title as recipeTitle, 
@@ -16,11 +16,11 @@
  			material,
 		(select member_nickname from Member m  where m.member_no = r.recipe_writer) as nickname,
 		 (select member_black from member m where m.member_no=r.recipe_writer )as black
-		from recipe_board r 	
+		from recipe_board r	
 		<if test="situation == 0 and material == 0  and recipeLevel == 0">
-		where recipe_delete=1 order by 1 desc)r where black=0 and rownum between 1 and 6	
+		where recipe_delete=1 order by 1 desc) r, (SELECT @ROWNUM:=0) Rn where black=0 and @ROWNUM:=@ROWNUM+1 between 1 and 6	
 		</if>
-	<trim suffix="and recipe_delete=1 order by 1 desc )r where black=0 and rownum between 1 and 6 " >
+	<trim suffix="and recipe_delete=1 order by 1 desc )r, (SELECT @ROWNUM:=0) Rn where black=0 and @ROWNUM:=@ROWNUM+1 between 1 and 6 " >
 	<choose>
 		<when test="situation gt 0 and material gt 0 and recipeLevel gt 0 ">
 		 where situation=#{situation} and  material=#{material} and recipe_level=#{recipeLevel}
@@ -169,7 +169,7 @@
  	<select id="selectMoreRecipe" parameterType="rb" resultType="rb">
  		select * from
         (select 
-        	rownum rnum,
+        	@ROWNUM,
  			recipe_no as recipeNo, 
  			recipe_title as recipeTitle, 
  			filepath,
@@ -178,12 +178,12 @@
  			recipe_level as recipeLevel,
  			situation,
  			material,
-		(select member_nickname from Member m  where m.member_no = r.recipe_writer) as nickname 
+		(select member_nickname from Member m  where m.member_no = rc.recipe_writer) as nickname 
 		from (select * from recipe_board	
 		<if test="situation == 0 and material == 0  and recipeLevel == 0">
-		where recipe_delete=1 order by 1 desc)r)r where rnum between #{start} and #{end}	
+		where recipe_delete=1 order by 1 desc)rc, (SELECT @ROWNUM:=0) R)rc2 where @ROWNUM:=@ROWNUM+1 between #{start} and #{end}	
 		</if>
-	<trim suffix="and recipe_delete=1 order by 1 desc)r)r where rnum between #{start} and #{end}" >
+	<trim suffix="and recipe_delete=1 order by 1 desc)r)r where @ROWNUM:=@ROWNUM+1 between #{start} and #{end}" >
 	<choose>
 		<when test="situation gt 0 and material gt 0 and recipeLevel gt 0 ">
 		 where situation=#{situation} and  material=#{material} and recipe_level=#{recipeLevel}
@@ -270,7 +270,7 @@
  	<select id="selectAllList" parameterType="_int" resultType="rb">
 	 	select * 
 	 	from
-			(select rownum as rnum, rb.*
+			(select @ROWNUM:=@ROWNUM+1 as rnum, rb.*
 				from(
 				(select recipe_no as recipeNo, recipe_writer as recipeWriter, filepath, read_count as readCount, recipe_video as recipeVideo, count(like_no) likeCnt, recipe_delete as recipeDelete
 					from recipe_board 
@@ -278,7 +278,7 @@
 					using(recipe_no) 
 					where recipe_writer in #{memberNo} and recipe_delete = 1
 					group by recipe_no, recipe_writer, filepath, read_count, recipe_video, recipe_delete
-				order by recipe_no desc) rb )) 
+				order by recipe_no desc) rb ), (SELECT @ROWNUM:=0) R) 
 		where rnum between 1 and 15
  	</select>
  	
@@ -286,7 +286,7 @@
  	<select id="selectAllAjaxList" parameterType="map" resultType="rb">
 	 	select * 
 	 	from
-			(select rownum as rnum, rb.*
+			(select @ROWNUM:=@ROWNUM+1 as rnum, rb.*
 				from(
 				(select recipe_no as recipeNo, recipe_writer as recipeWriter, filepath, read_count as readCount, recipe_video as recipeVideo, count(like_no) likeCnt, recipe_delete as recipeDelete
 					from recipe_board 
@@ -294,7 +294,7 @@
 					using(recipe_no) 
 					where recipe_writer in #{memberNo} and recipe_delete = 1
 					group by recipe_no, recipe_writer, filepath, read_count, recipe_video, recipe_delete
-				order by recipe_no desc) rb )) 
+				order by recipe_no desc) rb ), (SELECT @ROWNUM:=0) R) 
 		where rnum between #{start} and #{end}
  	</select>
 </mapper>

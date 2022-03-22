@@ -9,11 +9,11 @@
 	</select>
 	
 	<select id="foodList" parameterType="food" resultType="food">
-		SELECT F2.FOOD_NO AS foodNo, F2.FOOD_NAME AS foodName, F2.FOOD_CATEGORY AS foodCategory  FROM (SELECT ROWNUM AS rNum, F.* FROM (SELECT * FROM FOOD_LIST 
+		SELECT F2.FOOD_NO AS foodNo, F2.FOOD_NAME AS foodName, F2.FOOD_CATEGORY AS foodCategory  FROM (SELECT @ROWNUM:=@ROWNUM+1 AS rNum, F.* FROM (SELECT * FROM FOOD_LIST 
 		<if test="foodCategory != '전체'">
 			WHERE FOOD_CATEGORY=#{foodCategory}
 		</if>
-		) F) F2 WHERE rNum=#{rNum}
+		) F, (SELECT @ROWNUM:=0) R) F2 WHERE rNum=#{rNum}
 	</select>
 	
 </mapper>

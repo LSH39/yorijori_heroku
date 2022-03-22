@@ -13,7 +13,7 @@
   </select>
   <select id="selectMilkitList1" resultType="product">
 	select 
-  		rownum,
+  		@ROWNUM,
   		product_no as productNo,
   		recipe_no as recipeNo,
   		milkit_writer as milkitWriter,
@@ -25,10 +25,10 @@
   		milkit_date as milkitDate,
   		milkit_stock as milkitStock,
   		milkit_delete as milkitDelete
-  	from (select * from product  where milkit_delete=1 order by 1 desc) where rownum between 1 and 6
+  	from (select * from product  where milkit_delete=1 order by 1 desc) al, (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 6
   </select>
   <select id="selectMilkitList2" resultType="product">
-  select rownum,p.* from(select 	
+  select @ROWNUM,p.* from(select 	
         product_no as productNo,
   		recipe_no as recipeNo,
   		milkit_writer as milkitWriter,
@@ -41,7 +41,7 @@
   		milkit_stock as milkitStock,
   		milkit_delete as milkitDelete,
   	(select sum(order_option_amount) from order_option  where product_no = p.product_no)as amount
-	from product p where milkit_delete=1 order by amount desc nulls last)p where rownum between 1 and 6
+	from product p where milkit_delete=1 order by amount desc nulls last)p, (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 6
   </select>
   <insert id="insertMilkit" parameterType="product">
   	insert into product values(product_seq.nextval,#{recipeNo},#{milkitWriter},#{milkitName},#{milkitPrice},#{milkitComment},#{filepath},#{milkitContent},to_char(sysdate,'yyyy-mm-dd'),#{milkitStock},1)
@@ -51,7 +51,7 @@
   </select>
   <select id="selectMoreProduct1" parameterType="hashmap" resultType="product">
     select * from(select 
-  		rownum rnum, 
+  		@ROWNUM, 
   		product_no as productNo,
   		recipe_no as recipeNo,
   		milkit_writer as milkitWriter,
@@ -63,10 +63,10 @@
   		milkit_date as milkitDate,
   		milkit_stock as milkitStock,
   		milkit_delete as milkitDelete
-  	from (select * from product  where milkit_delete=1 order by 1 desc )p )p where rnum between #{start} and #{end}
+  	from (select * from product  where milkit_delete=1 order by 1 desc )p, (SELECT @ROWNUM:=0) R )p where @ROWNUM:=@ROWNUM+1 between #{start} and #{end}
   </select>
   <select id="selectMoreProduct2" parameterType="hashmap" resultType="product">
-  	 select * from(select rownum rnum,p.* from(select 	
+  	 select * from(select @ROWNUM,p.* from(select 	
         product_no as productNo,
   		recipe_no as recipeNo,
   		milkit_writer as milkitWriter,
@@ -79,7 +79,7 @@
   		milkit_stock as milkitStock,
   		milkit_delete as milkitDelete,
   	(select sum(order_option_amount) from order_option  where product_no = p.product_no)as amount
-	from product p where milkit_delete=1 order by amount desc nulls last)p)p where rnum between #{start} and #{end}
+	from product p where milkit_delete=1 order by amount desc nulls last)p, (SELECT @ROWNUM:=0) R) where @ROWNUM:=@ROWNUM+1 between #{start} and #{end}
   </select>
   <select id="selectOneProduct" parameterType="_int" resultType="product">
   	select 

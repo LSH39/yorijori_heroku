@@ -116,23 +116,23 @@
   
   <select id="rankingBoard" resultType="fb">
   
-  select * from (select free_no as freeNo, free_title as freeTitle, free_readcount as freeReadcount from freeboard order by freeReadcount desc) where rownum between 1 and 10
+  select * from (select free_no as freeNo, free_title as freeTitle, free_readcount as freeReadcount from freeboard order by freeReadcount desc), (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 10
   </select>
   <select id="rankingRecipe" resultType="rb">
-  select * from (select recipe_no as recipeNo , recipe_title as recipeTitle, read_count as readCount from recipe_board order by readCount desc) where rownum between 1 and 10
+  select * from (select recipe_no as recipeNo , recipe_title as recipeTitle, read_count as readCount from recipe_board order by readCount desc), (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 10
   </select>
   <select id="rankingFollow" resultType="m2">
   select * from(
-select member_no as memberNo , member_id as memberId,(select count(*) from follow where follow_no = member.member_no)memberPoint from member order by memberPoint desc) where rownum between 1 and 10
+select member_no as memberNo , member_id as memberId,(select count(*) from follow where follow_no = member.member_no)memberPoint from member order by memberPoint desc), (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 10
   </select>
   <select id="rankingMilkit" resultType="pd">
-  select * from (select product_no as productNo,milkit_name as milkitName, (select nvl(sum(order_option_amount),0)  from order_option where product_no = product.product_no)milkitStock from product order by milkitStock desc) where rownum between 1 and 10
+  select * from (select product_no as productNo,milkit_name as milkitName, (select nvl(sum(order_option_amount),0)  from order_option where product_no = product.product_no)milkitStock from product order by milkitStock desc), (SELECT @ROWNUM:=0) R where @ROWNUM:=@ROWNUM+1 between 1 and 10
   </select>
   <select id="selectNotice"  resultType="n">
 		select *
   		from
 	  	(select 
-	  		rownum as rnum,
+	  		@ROWNUM:=@ROWNUM+1 as rnum,
 	  		n.*
 	  	from
 		  	(select
@@ -142,7 +142,7 @@ select member_no as memberNo , member_id as memberId,(select count(*) from follo
 		  		notice_priority as noticePriority,
 		  		reg_date as regDate,
 		  		notice_readcount as noticeReadcount
-		  	from notice order by notice_no desc)n)
+		  	from notice order by notice_no desc)n, (SELECT @ROWNUM:=0) R)
 		where rnum between 1 and 5
 	</select>
   

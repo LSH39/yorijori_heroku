@@ -31,7 +31,7 @@
 	
 	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
 		<beans:property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-		<beans:property name="url" value="jdbc:mysql://be5bc5be13605e:1f633c36@us-cdbr-east-05.cleardb.net/heroku_d173abd5d1adeb9?reconnect=true"/>
+		<beans:property name="url" value="jdbc:mysql://be5bc5be13605e:1f633c36@us-cdbr-east-05.cleardb.net:3306/heroku_d173abd5d1adeb9?reconnect=true"/>
 		<beans:property name="username" value="be5bc5be13605e"/>
 		<beans:property name="password" value="1f633c36"/>
 	</beans:bean>
