@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main">
+	<select id="selectRecipeList" parameterType="String" resultType="rb">
+		select
+			recipe_no as recipeNo,
+			recipe_writer as recipeWriter,
+			recipe_title as recipeTitle,
+			recipe_delete,
+			filepath
+		from recipe_board
+        where recipe_title like '%' || #{keyword} || '%' and recipe_delete=1
+        order by recipe_no desc
+	</select>
+	<select id="selectMemberList" parameterType="String" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_nickname as memberNickname,
+			profile_path as profilePath,
+			member_level as memberLevel
+		from member
+		where member_level in (1, 2) and
+		(member_id like '%' || #{keyword} || '%' or
+        member_nickname like '%' || #{keyword} || '%')
+        order by member_no desc
+	</select>
+	<select id="selectClassList" parameterType="String" resultType="ccls">
+		select
+			class_no as classNo,
+			class_title as classTitle,
+			class_rate as classRate,
+			class_start as classStart,
+			class_status as classStatus,
+			class_location1 as classLocation1,
+			class_thumbnail_filepath as classThumbnailFilepath
+		from cooking_class
+		where class_title like '%' || #{keyword} || '%'
+		order by class_no desc
+	</select>
+	<select id="selectFreeboardList" parameterType="String" resultType="fb">
+		    select ff.* from
+		    (select
+				  		free_no as freeNo,
+				  		free_writer as freeWriter,
+				  		free_title as freeTitle,
+				  		free_content as freeContent,
+				  		reg_date as regDate,
+				  		free_readcount as freeReadcount,
+		                (select member_nickname from member where member_id=free_writer) as memberNickname,
+		                (select profile_path from member where member_id=free_writer) as profilePath,
+		                (select count(*) from freeboard_comment fc where fc.free_no=f.free_no) as fcCount,
+		                (select count(*) from freeboard_like fl where fl.free_no=f.free_no) as freeLikeCount 
+		    from freeboard f
+            where free_title like '%' || #{keyword} || '%'
+            order by free_no desc)ff
+	</select>
+	<select id="selectProductList" parameterType="String" resultType="product">
+		select
+			product_no as productNo,
+			recipe_no as recipeNo,
+			milkit_name as milkitName,
+			milkit_price as milkitPrice,
+			milkit_comment as milkitComment,
+			filepath
+		from product
+		where milkit_name like '%' || #{keyword} || '%'
+		order by product_no desc
+	</select>
+	<select id="selectProductList2" resultType="product">
+		select
+			product_no as productNo,
+			recipe_no as recipeNo,
+			milkit_name as milkitName,
+			milkit_price as milkitPrice,
+			milkit_comment as milkitComment,
+			filepath
+		from product
+		order by product_no desc
+	</select>
+	<select id="selectYoriList" resultType="m">
+		  select
+			member_no as memberNo,
+			member_id as memberId,
+			member_level as memberLevel,
+			member_nickname as memberNickname,
+			profile_path as profilePath,
+			profile_intro as profileIntro,
+			(select count(*) from follow f where f.follow_no=m.member_no) as followerCount
+		from member m
+		where member_level = 1
+		and member_black = 0
+		order by followerCount desc
+	</select>
+	<select id="selectJoriList" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_level as memberLevel,
+			member_nickname as memberNickname,
+			profile_path as profilePath,
+			profile_intro as profileIntro,
+			(select count(*) from follow f where f.follow_no=m.member_no) as followerCount
+		from member m
+		where member_level = 2
+		and member_black = 0
+		order by followerCount desc
+	</select>
+	<select id="selectClassList2" resultType="ccls">
+		 select
+			class_no as classNo,
+			class_title as classTitle,
+			class_rate as classRate,
+			class_content as classContent,
+			class_start as classStart,
+			class_end as classEnd,
+			class_nop as classNop,
+			class_status as classStatus,
+			class_location1 as classLocation1,
+			class_thumbnail_filepath as classThumbnailFilepath
+		from cooking_class
+		where class_status = 1
+        order by class_no desc
+	</select>
+	<select id="selectFollowingList" parameterType="_int" resultType="fd">
+		 select
+            following,
+            member_no as memberNo,
+            follow_no as followNo,
+            (select member_nickname from member m where follow_no=m.member_no) as followingNick
+        from follow
+        where member_no= #{memberNo}
+	</select>
+	<insert id="insertFollow" parameterType="map">
+		insert into follow
+		values (follow_seq.nextval, #{memberNo}, #{followNo})
+	</insert>
+	<select id="selectFollowerCount" parameterType="_int" resultType="_int">
+		select count(*) from follow where follow_no=#{followNo}
+	</select>
+	<delete id="deleteFollow" parameterType="map">
+		delete from follow
+		where member_no=#{memberNo} and follow_no = #{followNo}
+	</delete>
+	<select id="bestRecipes" parameterType="_int" resultType="rld">
+		 select
+            r.recipe_no as recipeNo,
+            r.recipe_title as recipeTitle,
+            r.food_name as foodName,
+            r.subhead as recipeContent,
+            r.recipe_writer as recipeWriterNo,
+            (select m.member_id from member m where r.recipe_writer=m.member_no) as memberId,
+            (select m.member_nickname from member m where r.recipe_writer=m.member_no) as memberNickname,
+            r.filepath as recipePath,
+            r.recipe_time as recipeTime,
+            r.recipe_delete as recipeDelete,
+            r.recipe_level as recipeLevel,
+            r.situation,
+            r.material as ingredient,
+            r.read_count as readCount,
+            (select count(*) from recipe_like rl where rl.recipe_no=r.recipe_no) as likeCount
+            from recipe_board r
+	       <choose>
+	           <when test="_parameter == 1"> <!-- 쉬운 술안주 -->
+	        where recipe_delete=1 and situation=1 and recipe_level in (3,2)
+	        	</when>
+	        	<when test="_parameter == 2"> <!-- 분식 -->
+	        where recipe_delete=1 and food_name like '%' || '떡볶이' or food_name like '%' || '김밥' or food_name like '%' || '라면' or food_name like '%' || '순대'
+	        	</when>
+	        	<when test="_parameter == 3"> <!-- 튀김요리 -->
+	        where  recipe_delete=1 and (recipe_title like '%' || '돈까스' || '%' or recipe_title like '%' || '돈가스' || '%' or recipe_title like '%' || '텐동' || '%' or recipe_title like '%' || '튀김' || '%')
+	        	</when>
+	        	<when test="_parameter == 4"> <!-- 몸보신 -->
+	        where  recipe_delete=1 and recipe_title like '%' || '삼계탕' || '%' or food_name like '%' || '탕' or food_name like '%' || '전골' || '%' or subhead like '%' || '원기' || '%' or subhead like '%' || '기력' || '%'
+	        	</when>
+	        	<when test="_parameter == 5"> <!-- 다이어트 -->
+	        where  recipe_delete=1 and (situation=2 or recipe_title like '%' || '샐러드' || '%')
+	        	</when>
+	        	<when test="_parameter == 6"> <!-- 베이킹 -->
+	        where  recipe_delete=1 and (recipe_title like '%' || '쿠키' || '%' or recipe_title like '%' || '케이크' || '%' or food_name like '%' || '쿠키' || '%' or food_name like '%' || '케이크' || '%' or food_name like '%' || '스콘' || '%' or food_name like '%' || '마카롱' || '%' or food_name like '%' || '머핀' || '%')
+	        	</when>
+	        </choose>
+        order by likeCount desc, readCount desc   
+	</select>
+	<insert id="insertRecentProduct" parameterType="map">
+		insert into recent_product values (rp_seq.nextval, #{productNo}, #{memberId}, sysdate)
+	</insert>
+	<select id="selectRecentProducts" parameterType="String" resultType="rpd">
+		 select
+            r.rp_no as rpNo,
+            r.product_no as productNo,
+            r.member_id as memberId,
+            r.reg_date as regDate,
+            (select p.recipe_no from product p where p.product_no=r.product_no) as recipeNo,
+            (select p.milkit_name from product p where p.product_no=r.product_no) as productName,
+            (select p.milkit_comment from product p where p.product_no=r.product_no) as productComment,
+            (select p.milkit_price from product p where p.product_no=r.product_no) as productPrice,
+            (select p.filepath from product p where p.product_no=r.product_no) as productPath
+        from recent_product r
+        where member_id=#{memberId}
+        order by rpNo desc
+	</select>
+	<select id="selectRecentProduct" parameterType="map" resultType="_int">
+		select
+			count(*) from recent_product where product_no=#{productNo} and member_id=#{memberId}
+	</select>
+	<delete id="deleteRecentProduct" parameterType="map">
+		delete from recent_product where product_no=#{productNo} and member_id=#{memberId}
+	</delete>
+</mapper>

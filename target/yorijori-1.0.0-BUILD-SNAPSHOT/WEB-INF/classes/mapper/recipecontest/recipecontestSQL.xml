@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="recipecontest">
+	<select id="totalCount" resultType="_int">
+		select count(*) from contest_recipe
+		where contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%'
+	</select>
+	<select id="selectList" parameterType="map" resultType="rc">
+		select ff.* from
+        (select @ROWNUM:=@ROWNUM+1 as rnum, f.* from
+        (select ccc.* from
+       (select
+            cc.*,
+            (select member_nickname from member m where memberNo=m.member_no) as memberNickname,
+            (select member_id from member m where memberNo=m.member_no) as memberId,
+            (select profile_path from member m where memberNo=m.member_no) as profilePath    
+            from
+       (select
+        cr.contest_no as contestNo,
+        cr.recipe_no as recipeNo,
+        cr.enter_date as enterDate,
+        cr.contest_result as contestResult,
+        cr.contest_month as contestMonth,
+        cr.recipe_delete as recipeDelete,
+        (select recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as memberNo,
+        (select recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
+        (select filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
+        (select subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
+        (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
+        (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
+        from contest_recipe cr
+        where recipe_delete=1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+       	<choose>
+	       	<when test="orderIndex==0">
+	       		order by contestNo desc)ccc)f, (SELECT @ROWNUM:=0) R)ff
+	       	</when>
+	       	<when test="orderIndex==1">
+	       		order by recipeTitle)ccc)f)ff
+	       	</when>
+	       	<when test="orderIndex==2">
+	       		order by voteCount desc)ccc)f)ff
+	       	</when>
+       	</choose>
+		where rnum between #{start} and #{end}
+	</select>
+	<select id="selectVote" parameterType="_int" resultType="_int">
+		select count(*) from contest_vote where member_no=#{memberNo} and vote_date like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+	</select>
+	<insert id="insertVote" parameterType="map">
+		insert into contest_vote values (vote_seq.nextval, #{memberNo}, #{contestNo}, to_char(sysdate, 'yyyy-mm-dd'))
+	</insert>
+	<select id="selectContestNo" parameterType="_int" resultType="_int">
+		select contest_no as contestNo from contest_vote where member_no=#{memberNo} and vote_date like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+	</select>
+	<select id="searchList" parameterType="map" resultType="rc">
+		select ff.* from
+        (select @ROWNUM:=@ROWNUM+1 as rnum, f.* from
+        (select ccc.* from
+       (select
+            cc.*,
+            (select member_nickname from member m where memberNo=m.member_no) as memberNickname,
+            (select member_id from member m where memberNo=m.member_no) as memberId,
+            (select profile_path from member m where memberNo=m.member_no) as profilePath    
+            from
+       (select
+        cr.contest_no as contestNo,
+        cr.recipe_no as recipeNo,
+        cr.enter_date as enterDate,
+        cr.contest_result as contestResult,
+        cr.contest_month as contestMonth,
+        cr.recipe_delete as recipeDelete,
+        (select recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as memberNo,
+        (select recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
+        (select filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
+        (select subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
+        (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
+        (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
+        from contest_recipe cr
+        where recipe_delete = 1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+        order by contestNo desc)ccc
+	        <choose>
+	           <when test="searchtype.equals('writerNickname')"> 
+	         where memberNickname like '%' || #{searchword} || '%')f, (SELECT @ROWNUM:=0) )ff
+	            </when>
+	            <when test="searchtype.equals('writerId')">
+	        where memberId like '%' || #{searchword} || '%')f)ff
+	            </when>
+	            <when test="searchtype.equals('title')">
+	       where recipeTitle like '%' || #{searchword} || '%')f)ff
+	            </when>
+	            <when test="searchtype.equals('content')">
+	       where recipeContent like '%' || #{searchword} || '%')f)ff
+	            </when>
+	        </choose>
+        where rnum between #{start} and #{end}
+	</select>
+	<select id="searchCount" parameterType="map" resultType="_int">
+		  select count(*) from
+        (select f.* from
+        (select ccc.* from
+       (select
+            cc.*,
+            (select member_nickname from member m where recipeWriterNo=m.member_no) as memberNickname,
+            (select member_id from member m where recipeWriterNo=m.member_no) as memberId,
+            (select profile_path from member m where recipeWriterNo=m.member_no) as profilePath    
+            from
+       (select
+        cr.contest_no as contestNo,
+        cr.recipe_no as recipeNo,
+        cr.enter_date as enterDate,
+        cr.contest_result as contestResult,
+        cr.contest_month as contestMonth,
+        cr.recipe_delete as recipeDelete,
+        (select recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as recipeWriterNo,
+        (select recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
+        (select filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
+        (select subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
+        (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
+        (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
+        from contest_recipe cr
+        where recipe_delete = 1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+        order by contestNo desc)ccc
+	        <choose>
+	           <when test="searchtype.equals('writerNickname')"> 
+	         where memberNickname like '%' || #{searchword} || '%')f)ff
+	            </when>
+	            <when test="searchtype.equals('writerId')">
+	        where memberId like '%' || #{searchword} || '%')f)ff
+	            </when>
+	            <when test="searchtype.equals('title')">
+	       where recipeTitle like '%' || #{searchword} || '%')f)ff
+	            </when>
+	            <when test="searchtype.equals('content')">
+	       where recipeContent like '%' || #{searchword} || '%')f)ff
+	            </when>
+	        </choose>
+	</select>
+	<select id="selectRecipeList" parameterType="map" resultType="cvd">
+		select cr.* from        
+        (select r.recipe_no as recipeNo,
+        r.recipe_writer as recipeWriterNo,
+        r.recipe_title as recipeTitle,
+        r.read_count as readCount,
+        r.recipe_date as recipeDate,
+        r.subhead as recipeContent,
+        r.food_name as foodName,
+        r.recipe_level as recipeLevel,
+        r.recipe_delete as recipeDelete,
+        r.filepath,
+        c.contest_no as contestNo,
+        c.enter_date as enterDate,
+        c.contest_month as contestMonth
+        from recipe_board r,
+        contest_recipe c
+        where r.recipe_no = c.recipe_no(+))cr
+       where recipeWriterNo=#{memberNo} and recipeDelete=1
+       and recipeDate like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+	</select>
+	<delete id="deleteContestRecipe" parameterType="_int">
+		delete from
+		contest_recipe where recipe_no = #{enteredNo}
+	</delete>
+	<insert id="insertContestRecipe" parameterType="map">
+		insert into contest_recipe
+		values (contest_seq.nextval, #{recipeNo}, 0, to_char(sysdate, 'yyyy-mm'), 1, to_char(sysdate, 'yyyy-mm-dd'))
+	</insert>
+	<select id="selectContestRecipeList" resultType="rc">
+	select cc.* from
+(select @ROWNUM:=@ROWNUM+1 as rnum,
+c.*,
+(select m.member_id from member m where m.member_no=memberNo) as memberId,
+(select m.member_nickname from member m where m.member_no=memberNo) as memberNickname,
+(select m.profile_path from member m where m.member_no=memberNo) as profilePath
+from
+(select cr.contest_no as contestNo,
+cr.recipe_no as recipeNo,
+(select r.recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as memberNo,
+(select r.filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
+(select r.recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
+(select r.subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
+cr.contest_result as contestResult,
+cr.contest_month as contestMonth,
+cr.recipe_delete as recipeDelete,
+cr.enter_date as enterDate,
+(select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
+from contest_recipe cr
+where contest_month like to_char(sysdate, 'yyyy-mm')
+order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
+where rnum between 1 and 3
+	</select>
+	<insert id="insertContest" parameterType="_int">
+		insert into contest_recipe
+		values (contest_seq.nextval, #{recipeNo}, 0, to_char(sysdate, 'yyyy-mm'), 1, sysdate)
+	</insert>
+	<update id="updateContestWinners" parameterType="map">
+		update contest_recipe
+		set contest_result = #{rank}
+		where contest_no = #{winner.contestNo}
+	</update>
+	<insert id="insertWinnerHistory" parameterType="map">
+		insert into contest_win values (contestwin_seq.nextval, #{winner.contestNo}, #{winner.voteCount}, to_char(sysdate, 'yyyy-mm'), #{winner.memberNo}, #{winner.recipeTitle}))
+	</insert>
+	<select id="selectSpecialWinners" resultType="rc">
+		<![CDATA[
+		select cc.* from
+(select @ROWNUM:=@ROWNUM+1 as rnum,
+c.*,
+(select m.member_id from member m where m.member_no=memberNo) as memberId,
+(select m.member_nickname from member m where m.member_no=memberNo) as memberNickname,
+(select m.profile_path from member m where m.member_no=memberNo) as profilePath
+from
+(select cr.contest_no as contestNo,
+cr.recipe_no as recipeNo,
+(select r.recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as memberNo,
+(select r.filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
+(select r.recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
+(select r.subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
+cr.contest_result as contestResult,
+cr.contest_month as contestMonth,
+cr.recipe_delete as recipeDelete,
+cr.enter_date as enterDate,
+(select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
+from contest_recipe cr
+where contest_month like to_char(sysdate, 'yyyy-mm')
+order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
+where voteCount >= 30 and recipeDelete = 1 ]]>
+	</select>
+	<update id="updateMemberPoints" parameterType="map">
+		update member
+		set member_point = member_point + #{point} 
+		where member_no = #{memberNo}
+	</update>
+</mapper>

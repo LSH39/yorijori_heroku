@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="direct">
+
+	<!-- 문의 목록 전체 조회 -->
+	<select id="dmList" resultType="dm" parameterType="map">
+		select
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo, 
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm 
+		where dm_no IN
+		    (select max(f.dm_no)
+    		from
+		        ( select * 
+        		from dm
+		        where dm_room_no in
+        		    (select dm_room_no
+		            from dm 
+        		    where dm_no IN 
+		                (select min(dm_no) 
+        		        from dm group by dm_room_no) 
+        		        <trim prefix="and">
+        		        	<if test="memberLevel==2">
+        		        dm_receiver like #{dmSender})) f        		        	
+        		        	</if>
+        		        	<if test="memberLevel!=2">
+        		        dm_sender like #{dmSender})) f        		        	
+        		        	</if>
+        		        </trim> 
+		    group by dm_room_no)
+		order by dm_read_flag asc, dm_date desc
+	</select>
+	<!--
+	<select id="dmList" resultType="dm">
+		select 
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo
+		from dm 
+		where dm_no IN 
+			(select max(dm_no) 
+			from dm group by dm_room_no) 
+			order by dm_read_flag asc, dm_date desc
+	</select>
+	-->
+
+	<!-- 최초 문의 보기 -->
+	<select id="selectOneDm" parameterType="map" resultType="dm">
+		select 
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo,
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm where class_no=#{classNo}
+		<trim prefix="and">
+			<if test="dmRoomNo != 0">
+				dm_room_no=#{dmRoomNo}
+			</if>
+		</trim>
+		order by dm_no asc
+	</select>
+	
+	<!-- 방 번호 있는 문의 -->
+	<select id="selectOneDmRoomId" parameterType="_int" resultType="dm">
+		select 
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo,
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm 
+		where dm_room_no=#{dmRoomNo}
+	</select>
+	
+
+	
+	<!-- 문의 작성 (구매자) -->
+	<insert id="insertDm" parameterType="map">
+		insert into dm values(
+			dm_seq.nextval, #{classNo}, #{dmReceiver}, #{dmSender}, #{dmContent}, 0, #{dmRoomNo}, to_char(sysdate, 'YYYY-MM-DD HH24:MI:SS'),
+			(select profile_path from member where member_nickname=#{dmReceiver}), (select profile_path from member where member_nickname=#{dmSender})
+		)
+	</insert>
+	
+	<!-- 문의 닉네임 변경 -->
+	<select id="changeReceiver" parameterType="_int" resultType="string">
+		select dm_sender as dmSender
+		from dm 
+		where dm_no IN (select min(dm_no) as dmNo from dm where dm_room_no=#{dmRoomNo})
+	
+	</select>
+	
+	<!-- 문의 채팅방 번호 찾기 -->
+	<select id="selectDmRoomNo2" parameterType="map" resultType="_int">
+		select distinct
+			dm_room_no as dmRoomNo
+		from dm
+		where class_no=#{classNo} and dm_sender=#{dmSender}
+	</select>
+	
+	<!-- 문의 목록에서 조회하는거 (12-23)-->
+	<select id="selectOneDmAjax" parameterType="_int" resultType="dm">
+		select
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo,
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm 
+		where dm_room_no=#{dmRoomNo}
+		order by dm_no asc
+	</select>
+	
+	<!-- 읽음 처리 12-23 -->
+	<update id="updateReadflag">
+		update dm set dm_read_flag=1 where dm_receiver=#{dmSender} and dm_room_no=#{dmRoomNo}
+	</update>
+	
+	<!-- 클래스뷰에서 문의 하기 눌러서 바로조회 이전거 있는지 확인 -->
+	<select id="selectOneDmList" parameterType="_int" resultType="dm">
+		select
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo,
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm 
+		where dm_room_no=#{dmRoomNo}
+		order by dm_no asc
+	</select>
+	
+	<!-- 클래스 뷰에서 바로 해당 클래스 문의 조회 -->
+	<select id="selectOneDmAjaxList" parameterType="map" resultType="dm">
+		select
+			dm_no as dmNo,
+			class_no as classNo,
+			dm_receiver as dmReceiver,
+			dm_sender as dmSender,
+			dm_content as dmContent,
+			dm_read_flag as dmReadFlag,
+			dm_date as dmDate, 
+			dm_room_no as dmRoomNo,
+			dm_rpic as dmRpic,
+			dm_spic as dmSpic
+		from dm 
+		where dm_room_no=#{dmRoomNo} and class_no=#{classNo}
+		order by dm_no asc
+	</select>
+	
+	<!-- 문의 채팅방 번호 찾기 (12-23)-->
+	<select id="selectOneDmRoomNo" parameterType="map" resultType="_int">
+		select distinct
+			dm_room_no as dmRoomNo
+		from dm
+		where class_no=#{classNo} and dm_sender=#{dmSender}
+	</select>
+	
+	<!-- 방 번호 생성 (12-23)-->
+	<select id="incDmRoomNo" resultType="_int">
+		select 
+			dm_room_seq.nextval 
+		from dual
+	</select>
+	
+	<!-- 안읽은 메세지 개수 조회 -->
+	<select id="selectDmCnt" parameterType="map" resultType="_int">
+		select count(dm_no)
+		from dm
+		where dm_read_flag=0 and dm_room_no=#{dmRoomNo} and dm_receiver=#{dmSender}
+	</select>
+
+</mapper>
+		<!-- 
+		 -->
