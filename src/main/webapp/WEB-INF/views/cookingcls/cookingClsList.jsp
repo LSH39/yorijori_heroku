@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <title>쿠킹클래스 목록</title>
 <link rel="stylesheet" href="resources/css/cookingcls/clsWrite.css">
-<script type="text/javascript"	src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript"	src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script>
 	$(function(){
 		$(".lv2only").click(function(){

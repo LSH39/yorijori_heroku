@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <link rel="stylesheet" href="/resources/css/product/updateFrm.css">
-<script type="text/javascript" src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />

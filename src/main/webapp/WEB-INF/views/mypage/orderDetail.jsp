@@ -6,7 +6,7 @@
 <html>
 <head>
 <script type="text/javascript"
-	src="http://code.jquery.com/jquery-3.3.1.js"></script>
+	src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <style>

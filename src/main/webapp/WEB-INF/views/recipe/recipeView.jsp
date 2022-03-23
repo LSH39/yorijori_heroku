@@ -8,7 +8,7 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <script type="text/javascript"
-	src="http://code.jquery.com/jquery-3.3.1.js"></script>
+	src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <link rel="stylesheet" href="/resources/css/recipe/recipeView.css">
 <style>
 </style>

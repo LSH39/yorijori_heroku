@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <link rel="stylesheet" href="/resources/css/membership/membershipFrm.css">
-<script type="text/javascript"	src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript"	src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
 </head>

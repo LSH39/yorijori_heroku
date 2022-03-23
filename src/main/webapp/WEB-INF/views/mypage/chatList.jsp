@@ -72,7 +72,7 @@ margin-top:120px;
 
 }
 </style>
-<script type="text/javascript" src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script>
 $(function(){
 $(".mypageChat").eq(0).click(function(){

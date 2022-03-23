@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<script type="text/javascript" src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <title>내 프로필</title>
 <link rel="stylesheet" href="resources/css/mypage/profile/style.css">
 <script>

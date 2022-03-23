@@ -8,7 +8,7 @@
 <!-- 별칭 ccls -->
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/dm/styles.css"/>
-<script type="text/javascript" src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
 <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=qg5b1hs250&submodules=geocoder"></script>
 <!-- 
