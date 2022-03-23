@@ -4,6 +4,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <head>
+
+  <!-- mixed content 문제 해결을 위해 -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
