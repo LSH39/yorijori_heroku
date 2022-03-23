@@ -288,10 +288,11 @@
             
             <!-- heroku maven버전 수정(연동)코드 -->
             <plugin>
+            	 <groupId>org.apache.maven.plugins</groupId>  <!-- 이 부분 추가 -->
 				 <artifactId>maven-war-plugin</artifactId>
 				 <version>2.4</version>
 				 <configuration>
-				 	<warSourceDirectory>WebContent</warSourceDirectory>
+				 	<warSourceDirectory>src/main/webapp</warSourceDirectory>  <!-- WebContent >> src/main/webapp으로 변경 -->
 				 	<failOnMissingWebXml>false</failOnMissingWebXml>
 				 </configuration>
 			</plugin>
