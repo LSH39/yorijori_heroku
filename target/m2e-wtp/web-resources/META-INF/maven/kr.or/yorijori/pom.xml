@@ -213,12 +213,24 @@
 		    <version>3.1.0</version>  <!-- heroku_수정 -->
 		    <scope>provided</scope>
 		</dependency>
+		<!-- yorijori는 에러 안나고 yorijori_heroku에서는 에러나서 수정. servlet버전때문인듯?? (참고: https://blog.daum.net/jwchoi1224/185) -->
+		<!-- heroku_변경(추가) -->
+		<!-- https://mvnrepository.com/artifact/javax.servlet.jsp/javax.servlet.jsp-api -->
+		<dependency>
+		    <groupId>javax.servlet.jsp</groupId>
+		    <artifactId>javax.servlet.jsp-api</artifactId>
+		    <version>2.3.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		<!-- heroku_변경(삭제) -->
+<!--
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>jsp-api</artifactId>
 			<version>2.1</version>
 			<scope>provided</scope>
 		</dependency>
+-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
