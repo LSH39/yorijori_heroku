@@ -29,6 +29,7 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
                         join recipe_board r on r.recipe_no=cr.recipe_no
 						where r.recipe_delete=1 and contest_month like DATE_FORMAT(sysdate(), '%Y-%m%')
 				)cc
+				join member m on memberNo = m.member_no
        	<choose>
 	       	<when test="orderIndex==0">
 	       		order by contestNo desc)ccc)f, (SELECT @ROWNUM:=0) R)ff
