@@ -17,7 +17,7 @@
 		SELECT CL.COUPON_LIST_NO AS couponListNo, C.COUPON_NAME AS couponName, C.COUPON_DISCOUNT AS couponDiscount
 		FROM COUPON_LIST CL
 		JOIN COUPON C ON C.COUPON_NO=CL.COUPON_NO
-		WHERE COUPON_USE=0 AND COUPON_END>=TO_CHAR(SYSDATE,'YYYY-MM-DD') AND MEMBER_NO=#{memberNo}
+		WHERE COUPON_USE=0 AND COUPON_END>=DATE_FORMAT(sysdate(), '%y-%m-%d') AND MEMBER_NO=#{memberNo}
 		]]>
 	</select>
 	
@@ -42,13 +42,13 @@
 		delete from cart where cart_no=#{cartNo}
 	</delete>
 	<update id="memberCouponUpdate" parameterType="_int">
-		update coupon_list set coupon_use=1, coupon_date=to_char(sysdate,'yyyy-mm-dd') where coupon_list_no=#{couponNo}
+		update coupon_list set coupon_use=1, coupon_date=DATE_FORMAT(sysdate(), '%y-%m-%d') where coupon_list_no=#{couponNo}
 	</update>
 	<update id="memberPointUpdate" parameterType="m">
 		update member set member_point=member_point-#{memberPoint} where member_no=#{memberNo}
 	</update>
 	<insert id="pointUpdate" parameterType="p">
-		insert into point values(point_seq.nextval,#{memberNo},2,#{pointAmount},to_char(sysdate,'yyyy-mm-dd'), '결제 시 사용')
+		insert into point values(point_seq.nextval,#{memberNo},2,#{pointAmount},DATE_FORMAT(sysdate(), '%y-%m-%d'), '결제 시 사용')
 	</insert>
 </mapper>
 
