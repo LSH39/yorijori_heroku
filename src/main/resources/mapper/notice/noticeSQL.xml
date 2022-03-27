@@ -39,7 +39,7 @@
 		from notice where notice_no=#{noticeNo}
 	</delete>
 	<insert id="insertNotice" parameterType="n">
-		insert into notice values (notice_seq.nextval, #{noticeWriter}, #{noticeTitle}, #{noticeContent}, #{noticePriority}, to_char(sysdate, 'yyyy-mm-dd'), 0, #{filename}, #{filepath})
+		insert into notice values (notice_seq.nextval, #{noticeWriter}, #{noticeTitle}, #{noticeContent}, #{noticePriority}, DATE_FORMAT(sysdate(), '%Y-%m-%d'), 0, #{filename}, #{filepath})
 	</insert>
 	<update id="rcUpdate" parameterType="_int">
 		update notice set notice_readcount = notice_readcount + 1
@@ -74,10 +74,10 @@
         WHERE N.NOTICENO= #{noticeNo}
 	</select>
 	<select id="searchList" parameterType="map" resultType="n">
-		select *
+		select nn.*
   		from
 	  	(select 
-	  		@ROWNUM:=@ROWNUM+1 as rnum,
+	  		@ROWNUM:=@ROWNUM+1,
 	  		n.*
 	  	from
 		  	(select
@@ -90,8 +90,8 @@
 		  		notice_readcount as noticeReadcount,
                 (select member_nickname from member where member_id=notice_writer) as memberNickname    
 		  	from notice 
-            order by noticePriority desc, notice_no desc)n, (SELECT @ROWNUM:=0) R)
-		where rnum between #{start} and #{end}
+            order by noticePriority desc, notice_no desc)n, (SELECT @ROWNUM:=0) R) nn
+		where @ROWNUM between #{start} and #{end}
         <choose>
            <when test="searchtype.equals('writerNickname')"> 
         and memberNickname like '%' || #{searchword} || '%'
