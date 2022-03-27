@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="freeboard">
 	<select id="freeList" parameterType="map" resultType="fb">
-		  select * from
-		    (select @ROWNUM:=@ROWNUM+1 as rnum, ff.* from
+		  select fff.* from
+		    (select @ROWNUM:=@ROWNUM+1, ff.* from
 		    (select
 				  		free_no as freeNo,
 				  		free_writer as freeWriter,
@@ -28,8 +28,8 @@
 		    		order by freeLikeCount desc
 		    	</when>	
 		    </choose>
-		    )ff, (SELECT @ROWNUM:=0) R)
-		    where rnum between #{start} and #{end}
+		    )ff, (SELECT @ROWNUM:=0) R) fff
+		    where @ROWNUM between #{start} and #{end}
 	</select>
 	<select id="totalCount" resultType="_int">
 		select count(*) from freeboard
@@ -58,7 +58,7 @@
 		where free_no=#{freeNo} order by 1
 	</select>
 	<select id="selectOneFree" parameterType="_int" resultType="fb">
-		 select * from
+		 select ff.* from
 		    (select
 				  		free_no as freeNo,
 				  		free_writer as freeWriter,
@@ -71,7 +71,7 @@
 		                (select profile_path from member where member_id=free_writer) as profilePath,
 		                (select count(*) from freeboard_comment fc where fc.free_no=f.free_no) as fcCount,
 		                (select count(*) from freeboard_like fl where fl.free_no=f.free_no) as freeLikeCount 
-		    from freeboard f)
+		    from freeboard f)ff
    	 		where freeNo=#{freeNo}
 	</select>
 	<insert id="freeboardLike" parameterType="map">
@@ -82,7 +82,7 @@
 		where free_no = #{freeNo} and free_liker=#{memberId}
 	</select>
 	<insert id="freeboardComment" parameterType="fc">
-		insert into freeboard_comment values (fc_seq.nextval, #{freeNo}, #{fcWriter}, #{fcContent}, to_char(sysdate, 'yyyy-mm-dd PM HH:MI'))
+		insert into freeboard_comment values (fc_seq.nextval, #{freeNo}, #{fcWriter}, #{fcContent}, DATE_FORMAT(sysdate(), '%y-%m-%d %p %h:%i'))
 	</insert>
 	<update id="rcUpdate" parameterType="_int">
 		update freeboard set free_readcount = free_readcount + 1
@@ -109,7 +109,7 @@
 		insert into fc_like values(fclike_seq.nextval, #{fcNo}, #{memberId})
 	</insert>
 	<insert id="insertFree" parameterType="fb">
-		insert into freeboard values(free_seq.nextval, #{freeWriter}, #{freeTitle}, #{freeContent}, to_char(sysdate, 'yyyy-mm-dd'), 0)
+		insert into freeboard values(free_seq.nextval, #{freeWriter}, #{freeTitle}, #{freeContent}, DATE_FORMAT(sysdate(), '%y-%m-%d'), 0)
 	</insert>
 	<insert id="insertFreeFile" parameterType="ff">
 		insert into freeboard_file values (ff_seq.nextval, #{freeNo}, #{ffFilename}, #{ffFilepath})
@@ -120,10 +120,10 @@
 		order by free_no desc
 	</select>
 	<select id="searchList" parameterType="map" resultType="fb">
-		select *
+		select nn.*
   		from
 	  	(select 
-	  		@ROWNUM:=@ROWNUM+1 as rnum,
+	  		@ROWNUM:=@ROWNUM+1,
 	  		n.*
 	  	from
 		  	(select
@@ -136,8 +136,8 @@
 		  		(select member_level from member where member_id=free_writer) as memberLevel,
                 (select member_nickname from member where member_id=free_writer) as memberNickname    
 		  	from freeboard
-            order by free_no desc)n, (SELECT @ROWNUM:=0) R)
-		where rnum between #{start} and #{end}
+            order by free_no desc)n, (SELECT @ROWNUM:=0) R)nn
+		where @ROWNUM between #{start} and #{end}
         <choose>
            <when test="searchtype.equals('writerNickname')"> 
         and memberNickname like '%' || #{searchword} || '%'
