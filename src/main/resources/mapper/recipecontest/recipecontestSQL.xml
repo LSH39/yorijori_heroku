@@ -221,7 +221,7 @@ cr.recipe_delete as recipeDelete,
 cr.enter_date as enterDate,
 (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
 from contest_recipe cr
-where contest_month like to_char(sysdate, 'yyyy-mm')
+where contest_month like DATE_FORMAT(sysdate(), '%Y-%m')
 order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
 where voteCount >= 30 and recipeDelete = 1 ]]>
 	</select>
