@@ -26,11 +26,10 @@
 	</select>
 	-->
 	<select id="selectClassList" parameterType="map"  resultType="ccls">
-		select *
+		select cc.*
 		from
 		(select 
-			@ROWNUM:=@ROWNUM+1 as rnum,
-			c.*
+			@ROWNUM:=@ROWNUM+1, c.*
 		from
 		(select
 			class_no as classNo,
@@ -43,8 +42,8 @@
 			class_thumbnail_filepath as classThumbNailFilepath
 		from cooking_class 
         where class_status=1 or (class_status=4 and class_location1 is null)
-        order by class_no desc) c, (SELECT @ROWNUM:=0) R )
-		where rnum between #{start} and #{end}
+        order by class_no desc) c, (SELECT @ROWNUM:=0) R ) cc
+		where @ROWNUM between #{start} and #{end}
 	</select>
 	
 	<!-- 전체 페이지 수 -->
