@@ -304,11 +304,11 @@
   	function chkDate(){
   		var today = new Date();
   		var date = today.getDate();
-  		//if(date >= 1 && date <= 31){
-  		//	location.href="/contestList.do?reqPage=1&orderIndex=0";
-  		//}else {
+  		if(date >= 1 && date <= 31){
+  			location.href="/contestList.do?reqPage=1&orderIndex=0";
+  		}else {
   			alert("대회 투표기간이 아닙니다.");
-  		//}
+  		}
   		
   	}
 	
@@ -318,11 +318,11 @@
   		var date = today.getDate();
   		var hours = today.getHours(); //시간
   		var minutes = today.getMinutes();
-  		//if((date >= 25 && hours >= 12 && minutes >=30) || date>= 26 && date <= 31){
-  		//	location.href="/contestResult.do";
-  		//}else {
+  		if((date >= 25 && hours >= 12 && minutes >=30) || date>= 26 && date <= 31){
+  			location.href="/contestResult.do";
+  		}else {
   			alert("우승자 발표기간이 아닙니다.");
-  		//}
+  		}
   		
   	}
 	

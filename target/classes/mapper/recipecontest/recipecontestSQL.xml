@@ -154,7 +154,7 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
         contest_recipe c
         where r.recipe_no = c.recipe_no(+))cr
        where recipeWriterNo=#{memberNo} and recipeDelete=1
-       and recipeDate like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+       and recipeDate like '%' || DATE_FORMAT(sysdate(), '%Y-%m%')
 	</select>
 	<delete id="deleteContestRecipe" parameterType="_int">
 		delete from
