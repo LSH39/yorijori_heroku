@@ -359,16 +359,16 @@ and memberLevel = 5
 	
 	
 	<insert id="joinAdmin" parameterType="m">
-		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},'1900-01-01','00000','admin','admin',0,'profile_admin.png','admin',null,3,0,to_char(sysdate,'yyyy-mm-dd'),null,0)
+		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},'1900-01-01','00000','admin','admin',0,'profile_admin.png','admin',null,3,0,DATE_FORMAT(sysdate(), '%y-%m-%d'),null,0)
 	</insert>
 	<insert id="joinBasic" parameterType="m">
-		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},#{memberBirth},#{postcode},#{addressRoad},#{addressDetail},#{memberConsent},'profile_basic.png',null,null,1,0,to_char(sysdate,'yyyy-mm-dd'),null,0)
+		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},#{memberBirth},#{postcode},#{addressRoad},#{addressDetail},#{memberConsent},'profile_basic.png',null,null,1,0,DATE_FORMAT(sysdate(), '%y-%m-%d'),null,0)
 		<selectKey resultType="_int" order="AFTER" keyProperty="memberNo">
 			select member_no from member where member_id=#{memberId}
 		</selectKey>
 	</insert>
 	<insert id="joinPro" parameterType="m">
-		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},#{memberBirth},#{postcode},#{addressRoad},#{addressDetail},#{memberConsent},'profile_basic.png',null,#{certificatePath},4,0,to_char(sysdate,'yyyy-mm-dd'),null,0)
+		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},#{memberBirth},#{postcode},#{addressRoad},#{addressDetail},#{memberConsent},'profile_basic.png',null,#{certificatePath},4,0,DATE_FORMAT(sysdate(), '%y-%m-%d'),null,0)
 		<selectKey resultType="_int" order="AFTER" keyProperty="memberNo">
 			select member_no from member where member_id=#{memberId}
 		</selectKey>
