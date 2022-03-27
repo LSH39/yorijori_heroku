@@ -28,11 +28,11 @@ function idCheck(obj) {
                 url: "/joinSearch.do",
                 data: {memberId:inputId},
                 success: function (data) {
-                    if(data != 0){
-                    	$(".join_check").eq(0).text("이미 사용중인 아이디입니다.");
-                    }else{
+                    if(data == 0){
                     	$(".join_check").eq(0).text("사용가능한 아이디입니다.").css("color","#0000FF");
                     	checkId = 1;
+                    }else{
+                    	$(".join_check").eq(0).text("이미 사용중인 아이디입니다.");
                     }
                 }
             });
