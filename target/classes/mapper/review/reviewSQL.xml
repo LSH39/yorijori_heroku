@@ -27,7 +27,7 @@
 	<!-- 리뷰 평균 평점 조회 -->
 	<select id="avgReviewRate" parameterType="_int" resultType="_double">
 		select 
-			nvl(trunc(avg(review_rate), 1), 0) 
+			COALESCE(truncate(avg(review_rate), 1), 0) 
 		from review 
 		where class_no=#{classNo}
 	</select>
