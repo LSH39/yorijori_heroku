@@ -32,7 +32,10 @@
 	$(function(){
 	    $("#chatFrmUser").css("display","none").prop("on",false);
 	    $(".chatAlarm").css("display","inline");
-	    ws = new WebSocket("ws://khdsa1.iptime.org:18080/chatWebsoket.do");
+	 	// heroku websocket 주소
+	    var host = location.origin.replace(/^http/, 'ws');
+		this.connection = new WebSocket(host+"/chatWebsocket.do");
+	    //ws = new WebSocket("ws://khdsa1.iptime.org:18080/chatWebsoket.do");
 		ws.onopen = startChat;
 		ws.onmessage = receiveMsg;
         ws.onclose = endChat;

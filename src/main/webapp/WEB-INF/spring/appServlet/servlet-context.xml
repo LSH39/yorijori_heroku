@@ -79,10 +79,10 @@
 	</beans:bean>
 	
 	<!-- 웹소켓. 1:1채팅 -->
-	<beans:bean id="chatWebsoket" class="kr.or.chat.model.service.ChatWebsoket"/>
+	<beans:bean id="chatWebsocket" class="kr.or.chat.model.service.ChatWebsocket"/>
 	<!-- 웹소켓 설정 -->
 	<websocket:handlers>
-		<websocket:mapping handler="chatWebsoket" path="/chatWebsoket.do"/>
+		<websocket:mapping handler="chatWebsocket" path="/chatWebsocket.do"/>
 	</websocket:handlers>
 	
 	

@@ -18,7 +18,7 @@ import kr.or.chat.model.dao.ChatDao;
 import kr.or.chat.model.vo.Chat;
 import kr.or.chat.model.vo.ChatBot;
 
-public class ChatWebsoket  extends TextWebSocketHandler{
+public class ChatWebsocket  extends TextWebSocketHandler{
 		private ArrayList<WebSocketSession> sessionList;
 		private HashMap<WebSocketSession, Integer> memberList;
 		@Autowired
@@ -30,7 +30,7 @@ public class ChatWebsoket  extends TextWebSocketHandler{
 		private HashMap<Integer, Integer> adminAlarm;  // adminHome 알림표시
 		private int adminNo;
 
-		public ChatWebsoket() {
+		public ChatWebsocket() {
 			super();
 			sessionList = new ArrayList<WebSocketSession>();
 			memberList = new HashMap<WebSocketSession, Integer>();

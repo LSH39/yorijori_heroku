@@ -20,7 +20,7 @@
 		where (c.chat_receive in(#{chatReceive},#{chatSend}) and c.chat_send in(#{chatReceive},#{chatSend})) and m.member_no=chat_send order by chat_no
 	</select>
 	<insert id="chatSend" parameterType="chat">
-		insert into chat values(chat_seq.nextval,#{chatSend},#{chatReceive},#{chatContent},sysdate)
+		insert into chat values(chat_seq.nextval,#{chatSend},#{chatReceive},#{chatContent},sysdate())
 		<selectKey resultType="_int" order="AFTER" keyProperty="chatNo">
 			select max(chat_no) from chat
 		</selectKey>
@@ -32,7 +32,7 @@
 		where c.chat_no=#{chatNo}
 	</select>
 	<select id="onePrevSelect" parameterType="_int" resultType="chat">
-		select chat_date as chatDate from (select @ROWNUM:=@ROWNUM+1 as rnum, c.* from (select * from chat where chat_send=#{chatSend} order by chat_no desc)c)c2, (SELECT @ROWNUM:=0) R where rnum=2
+		select chat_date as chatDate from (select @ROWNUM:=@ROWNUM+1, c.* from (select * from chat where chat_send=#{chatSend} order by chat_no desc)c)c2, (SELECT @ROWNUM:=0) R where @ROWNUM=2
 	</select>
 	
 	<!-- chatbot -->

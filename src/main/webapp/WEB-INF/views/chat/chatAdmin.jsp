@@ -47,7 +47,10 @@
         $("#chatFrmAdmin").css("display","none").prop("on",false);
 	    $(".chatAlarm").css("display","inline");
 	    $.ajax()
-        ws = new WebSocket("ws://khdsa1.iptime.org:18080/chatWebsoket.do");
+	    // heroku websocket 주소
+	    var host = location.origin.replace(/^http/, 'ws');
+	    this.connection = new WebSocket(host+"/chatWebsocket.do");
+        //ws = new WebSocket("ws://khdsa1.iptime.org:18080/chatWebsoket.do");
         ws.onopen = startChat;  // ws.onopen 은 웹소켓 연결시 자동으로 실행됨
         ws.onmessage = receiveMsg;
         ws.onclose = endChat;
