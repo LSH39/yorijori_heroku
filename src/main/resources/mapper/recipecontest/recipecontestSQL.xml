@@ -6,30 +6,29 @@
 		where contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%'
 	</select>
 	<select id="selectList" parameterType="map" resultType="rc">
-		select ff.* from
-        (select @ROWNUM:=@ROWNUM+1 as rnum, f.* from
-        (select ccc.* from
-       (select
-            cc.*,
-            (select member_nickname from member m where memberNo=m.member_no) as memberNickname,
-            (select member_id from member m where memberNo=m.member_no) as memberId,
-            (select profile_path from member m where memberNo=m.member_no) as profilePath    
-            from
-       (select
-        cr.contest_no as contestNo,
-        cr.recipe_no as recipeNo,
-        cr.enter_date as enterDate,
-        cr.contest_result as contestResult,
-        cr.contest_month as contestMonth,
-        cr.recipe_delete as recipeDelete,
-        (select recipe_writer from recipe_board r where r.recipe_no=cr.recipe_no) as memberNo,
-        (select recipe_title from recipe_board r where r.recipe_no=cr.recipe_no) as recipeTitle,
-        (select filepath from recipe_board r where r.recipe_no=cr.recipe_no) as recipePath,
-        (select subhead from recipe_board r where r.recipe_no=cr.recipe_no) as recipeContent,
-        (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
-        (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
-        from contest_recipe cr
-        where recipe_delete=1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+		select ff.* 
+from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.* 
+		from	(select ccc.* 
+        from	(select cc.*,
+						m.member_nickname as memberNickname,
+                        m.member_id as memberId,
+                        m.profile_path as profilePath
+				from	(select cr.contest_no as contestNo,         
+								cr.recipe_no as recipeNo,         
+                                cr.enter_date as enterDate,       
+                                cr.contest_result as contestResult, 
+								cr.contest_month as contestMonth, 
+                                cr.recipe_delete as recipeDelete, 
+                                r.recipe_writer as memberNo,
+                                r.recipe_title as recipeTitle,
+                                r.filepath as recipePath,
+                                r.subhead as recipeContent,
+                                r.food_name as foodName,
+								(select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount         
+						from contest_recipe cr 
+                        join recipe_board r on r.recipe_no=cr.recipe_no
+						where r.recipe_delete=1 and contest_month like DATE_FORMAT(sysdate(), '%Y-%m%')
+				)cc
        	<choose>
 	       	<when test="orderIndex==0">
 	       		order by contestNo desc)ccc)f, (SELECT @ROWNUM:=0) R)ff
