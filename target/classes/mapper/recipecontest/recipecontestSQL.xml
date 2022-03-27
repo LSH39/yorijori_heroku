@@ -3,7 +3,7 @@
 <mapper namespace="recipecontest">
 	<select id="totalCount" resultType="_int">
 		select count(*) from contest_recipe
-		where contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%'
+		where contest_month like DATE_FORMAT(sysdate(), '%Y-%m%')
 	</select>
 	<select id="selectList" parameterType="map" resultType="rc">
 		select ff.* 
