@@ -357,7 +357,7 @@ and memberLevel = 5
 		</choose>
 	</select>
 	
-	
+	<!-- joinAdmin,Basic,Pro,Coupon 관련. 시퀀스(seq) 없어서 가입 불가 -->
 	<insert id="joinAdmin" parameterType="m">
 		insert into member values(member_seq.nextval,#{memberId},#{memberPw},#{memberEmail},#{memberName},#{memberNickname},#{memberPhone},'1900-01-01','00000','admin','admin',0,'profile_admin.png','admin',null,3,0,DATE_FORMAT(sysdate(), '%y-%m-%d'),null,0)
 	</insert>
