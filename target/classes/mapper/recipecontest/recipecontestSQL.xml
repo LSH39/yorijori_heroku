@@ -44,13 +44,13 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
 		where rnum between #{start} and #{end}
 	</select>
 	<select id="selectVote" parameterType="_int" resultType="_int">
-		select count(*) from contest_vote where member_no=#{memberNo} and vote_date like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+		select count(*) from contest_vote where member_no=#{memberNo} and vote_date like DATE_FORMAT(sysdate(), '%Y-%m%')
 	</select>
 	<insert id="insertVote" parameterType="map">
-		insert into contest_vote values (vote_seq.nextval, #{memberNo}, #{contestNo}, to_char(sysdate, 'yyyy-mm-dd'))
+		insert into contest_vote values (vote_seq.nextval, #{memberNo}, #{contestNo}, DATE_FORMAT(sysdate(), '%Y-%m-%d'))
 	</insert>
 	<select id="selectContestNo" parameterType="_int" resultType="_int">
-		select contest_no as contestNo from contest_vote where member_no=#{memberNo} and vote_date like '%' || to_char(sysdate, 'yyyy-mm') || '%'
+		select contest_no as contestNo from contest_vote where member_no=#{memberNo} and vote_date like DATE_FORMAT(sysdate(), '%Y-%m%')
 	</select>
 	<select id="searchList" parameterType="map" resultType="rc">
 		select ff.* from
@@ -76,7 +76,7 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
         (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
         (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
         from contest_recipe cr
-        where recipe_delete = 1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+        where recipe_delete = 1 and contest_month like DATE_FORMAT(sysdate(), '%Y-%m%'))cc
         order by contestNo desc)ccc
 	        <choose>
 	           <when test="searchtype.equals('writerNickname')"> 
@@ -118,7 +118,7 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
         (select food_name from recipe_board r where r.recipe_no=cr.recipe_no) as foodName,
         (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
         from contest_recipe cr
-        where recipe_delete = 1 and contest_month like to_char(sysdate, 'yyyy') || '-' || to_char(sysdate, 'mm') || '%')cc
+        where recipe_delete = 1 and contest_month like DATE_FORMAT(sysdate(), '%Y-%m%'))cc
         order by contestNo desc)ccc
 	        <choose>
 	           <when test="searchtype.equals('writerNickname')"> 
@@ -162,7 +162,7 @@ from	(select @ROWNUM:=@ROWNUM+1 as rnum, f.*
 	</delete>
 	<insert id="insertContestRecipe" parameterType="map">
 		insert into contest_recipe
-		values (contest_seq.nextval, #{recipeNo}, 0, to_char(sysdate, 'yyyy-mm'), 1, to_char(sysdate, 'yyyy-mm-dd'))
+		values (contest_seq.nextval, #{recipeNo}, 0, DATE_FORMAT(sysdate(), '%Y-%m'), 1, DATE_FORMAT(sysdate(), '%Y-%m-%d'))
 	</insert>
 	<select id="selectContestRecipeList" resultType="rc">
 	select cc.* from
@@ -184,13 +184,13 @@ cr.recipe_delete as recipeDelete,
 cr.enter_date as enterDate,
 (select count(*) from contest_vote cv where cv.contest_no=cr.contest_no) as voteCount
 from contest_recipe cr
-where contest_month like to_char(sysdate, 'yyyy-mm')
+where contest_month like DATE_FORMAT(sysdate(), '%Y-%m')
 order by voteCount desc, contestNo)c, (SELECT @ROWNUM:=0) R)cc
 where rnum between 1 and 3
 	</select>
 	<insert id="insertContest" parameterType="_int">
 		insert into contest_recipe
-		values (contest_seq.nextval, #{recipeNo}, 0, to_char(sysdate, 'yyyy-mm'), 1, sysdate)
+		values (contest_seq.nextval, #{recipeNo}, 0, DATE_FORMAT(sysdate(), '%Y-%m%'), 1, sysdate())
 	</insert>
 	<update id="updateContestWinners" parameterType="map">
 		update contest_recipe
@@ -198,7 +198,7 @@ where rnum between 1 and 3
 		where contest_no = #{winner.contestNo}
 	</update>
 	<insert id="insertWinnerHistory" parameterType="map">
-		insert into contest_win values (contestwin_seq.nextval, #{winner.contestNo}, #{winner.voteCount}, to_char(sysdate, 'yyyy-mm'), #{winner.memberNo}, #{winner.recipeTitle}))
+		insert into contest_win values (contestwin_seq.nextval, #{winner.contestNo}, #{winner.voteCount}, DATE_FORMAT(sysdate(), '%Y-%m'), #{winner.memberNo}, #{winner.recipeTitle}))
 	</insert>
 	<select id="selectSpecialWinners" resultType="rc">
 		<![CDATA[
